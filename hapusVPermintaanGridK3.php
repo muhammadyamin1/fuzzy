@@ -9,6 +9,6 @@ $query = "DELETE FROM fungsi_keanggotaan_gridk3 WHERE id = $id";
 mysqli_query($conn, $query);
 
 // Redirect ke halaman tampil
-header("Location: vStokGridK3.php");
+header("Location: vPermintaanGridK3.php");
 exit();
 ?>

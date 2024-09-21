@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     WHERE id = $id";
 
     mysqli_query($conn, $updateQuery);
-    header("Location: vStokGridK3.php");
+    header("Location: vPermintaanGridK3.php");
     exit();
 }
 ?>
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <input type="hidden" name="tipe" value="<?php echo $row['tipe']; ?>"> <!-- Menyimpan tipe -->
             <button type="submit" class="btn btn-primary">Simpan</button>
-            <a href="vStokGridK3.php" class="btn btn-secondary">Batal</a>
+            <a href="vPermintaanGridK3.php" class="btn btn-secondary">Batal</a>
         </form>
     </div>
 </body>

@@ -3,7 +3,7 @@ include 'auth.php';
 include 'dbKoneksi.php';
 
 // Mengambil data dari tabel
-$sql = "SELECT nama_fungsi, batas_bawah, batas_tengah, batas_atas, tipe FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok'";
+$sql = "SELECT nama_fungsi, batas_bawah, batas_tengah, batas_atas, tipe FROM fungsi_keanggotaan_gridk3 WHERE jenis='Produksi'";
 $result = $conn->query($sql);
 
 $membershipData = [];

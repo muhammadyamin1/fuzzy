@@ -3,11 +3,10 @@ include 'auth.php';
 include 'dbKoneksi.php';
 
 // Ambil data dari tabel
-$query = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok' ORDER BY batas_atas ASC;";
+$query = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Produksi' ORDER BY batas_atas ASC;";
 $result = mysqli_query($conn, $query);
 
-// Cek apakah ada data dengan jenis "Stok"
-$stokExists = mysqli_num_rows($result) > 0;
+$Exists = mysqli_num_rows($result) > 0;
 ?>
 <!DOCTYPE html>
 <html>
@@ -112,7 +111,7 @@ $stokExists = mysqli_num_rows($result) > 0;
                     <ol class="breadcrumb">
                         <li><a href="javascript:void(0);">Kelola Data</a></li>
                         <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=3)</a></li>
-                        <li class="active">Variabel Stok</li>
+                        <li class="active">Variabel Produksi</li>
                     </ol>
                 </div>
             </div>
@@ -121,12 +120,12 @@ $stokExists = mysqli_num_rows($result) > 0;
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Fungsi Keanggotaan Fuzzy Grid Partition K3 - Variabel Stok
+                                Fungsi Keanggotaan Fuzzy Grid Partition K3 - Variabel Produksi
                             </h2>
                         </div>
                         <div class="body">
-                            <?php if (!$stokExists): ?>
-                                <a class="btn btn-primary" href="inputStokGridK3.php" role="button">Tambah Fungsi Keanggotaan</a>
+                            <?php if (!$Exists): ?>
+                                <a class="btn btn-primary" href="inputProduksiGridK3.php" role="button">Tambah Fungsi Keanggotaan</a>
                             <?php else: ?>
                                 <button class="btn btn-primary" disabled>Tambah Fungsi Keanggotaan (Sudah ada data)</button>
                             <?php endif; ?>
@@ -157,8 +156,8 @@ $stokExists = mysqli_num_rows($result) > 0;
                                             <td><?php echo $row['batas_tengah']; ?></td>
                                             <td><?php echo $row['batas_atas']; ?></td>
                                             <td>
-                                                <a href="editVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
-                                                <a href="hapusVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
+                                                <a href="editVProduksiGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
+                                                <a href="hapusVProduksiGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>
@@ -215,7 +214,7 @@ $stokExists = mysqli_num_rows($result) > 0;
     <script src="js/demo.js"></script>
 
     <script>
-        fetch('getVStokGridK3.php')
+        fetch('getVProduksiGridK3.php')
             .then(response => response.json())
             .then(membershipData => {
                 var datasets = [];
