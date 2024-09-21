@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>Sign In | Bootstrap Based Admin Template - Material Design</title>
-    <!-- Favicon-->
+    <title>Masuk | Fuzzy Tsukamoto - Fuzzy Grid Partition</title>
+    <!-- Favicon -->
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
     <!-- Google Fonts -->
@@ -26,6 +26,21 @@
 </head>
 
 <body class="login-page">
+    <?php
+    session_start();
+    if (isset($_SESSION['error'])) {
+        echo '<div class="alert alert-danger mt-4 mb-3">' . htmlspecialchars($_SESSION['error']) . '</div>';
+        unset($_SESSION['error']);
+    }
+    if (isset($_SESSION['success'])) {
+        echo '<div class="alert alert-success mt-4 mb-3">' . htmlspecialchars($_SESSION['success']) . '</div>';
+        unset($_SESSION['success']);
+    }
+    $username = isset($_SESSION['input_username']) ? htmlspecialchars($_SESSION['input_username']) : '';
+    if (isset($_SESSION['input_username'])) {
+        unset($_SESSION['input_username']);
+    }
+    ?>
     <div class="login-box">
         <div class="logo">
             <a href="javascript:void(0);">Fuzzy Tsukamoto<br><b>Fuzzy Grid Partition</b></a>
@@ -33,14 +48,14 @@
         </div>
         <div class="card">
             <div class="body">
-                <form id="sign_in" method="POST">
+                <form id="sign_in" method="POST" action="prosesLogin.php" autocomplete="off">
                     <div class="msg">Login untuk memulai</div>
                     <div class="input-group">
                         <span class="input-group-addon">
                             <i class="material-icons">person</i>
                         </span>
                         <div class="form-line">
-                            <input type="text" class="form-control" name="username" placeholder="Username" required autofocus>
+                            <input type="text" class="form-control" name="username" placeholder="Username" value="<?php echo $username; ?>" autocomplete="off" required autofocus aria-label="Username">
                         </div>
                     </div>
                     <div class="input-group">
@@ -48,7 +63,7 @@
                             <i class="material-icons">lock</i>
                         </span>
                         <div class="form-line">
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" autocomplete="new-password" required aria-label="Password">
                         </div>
                     </div>
                     <div class="row">
@@ -82,14 +97,10 @@
     <script src="js/pages/examples/sign-in.js"></script>
 
     <script>
-        //Tampil Password Form Login
+        // Toggle Password Form Login
         function togglePassword() {
             var passwordField = document.getElementById("password");
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-            } else {
-                passwordField.type = "password";
-            }
+            passwordField.type = (passwordField.type === "password") ? "text" : "password";
         }
     </script>
 </body>

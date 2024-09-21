@@ -1,3 +1,13 @@
+<?php
+include 'dbKoneksi.php';
+
+// Ambil data dari tabel
+$query = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok' ORDER BY batas_atas ASC;";
+$result = mysqli_query($conn, $query);
+
+// Cek apakah ada data dengan jenis "Stok"
+$stokExists = mysqli_num_rows($result) > 0;
+?>
 <!DOCTYPE html>
 <html>
 
@@ -83,22 +93,7 @@
         <!-- Left Sidebar -->
         <aside id="leftsidebar" class="sidebar">
             <!-- User Info -->
-            <div class="user-info">
-                <div class="image">
-                    <img src="images/user.png" width="48" height="48" alt="User" />
-                </div>
-                <div class="info-container">
-                    <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Murni Marbun</div>
-                    <div class="email">murnimarbun@gmail.com</div>
-                    <div class="btn-group user-helper-dropdown">
-                        <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
-                        <ul class="dropdown-menu pull-right">
-                            <li><a href="javascript:void(0);"><i class="material-icons">person</i>Kelola Profil</a></li>
-                            <li><a href="javascript:void(0);"><i class="material-icons">input</i>Sign Out</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <?php include 'header.php'; ?>
             <!-- #User Info -->
             <!-- Menu -->
             <?php include 'sidebar.php'; ?>
@@ -112,188 +107,72 @@
             <!-- #Footer -->
         </aside>
         <!-- #END# Left Sidebar -->
-        <!-- Right Sidebar -->
-        <aside id="rightsidebar" class="right-sidebar">
-            <ul class="nav nav-tabs tab-nav-right" role="tablist">
-                <li role="presentation" class="active"><a href="#skins" data-toggle="tab">SKINS</a></li>
-                <li role="presentation"><a href="#settings" data-toggle="tab">SETTINGS</a></li>
-            </ul>
-            <div class="tab-content">
-                <div role="tabpanel" class="tab-pane fade in active in active" id="skins">
-                    <ul class="demo-choose-skin">
-                        <li data-theme="red" class="active">
-                            <div class="red"></div>
-                            <span>Red</span>
-                        </li>
-                        <li data-theme="pink">
-                            <div class="pink"></div>
-                            <span>Pink</span>
-                        </li>
-                        <li data-theme="purple">
-                            <div class="purple"></div>
-                            <span>Purple</span>
-                        </li>
-                        <li data-theme="deep-purple">
-                            <div class="deep-purple"></div>
-                            <span>Deep Purple</span>
-                        </li>
-                        <li data-theme="indigo">
-                            <div class="indigo"></div>
-                            <span>Indigo</span>
-                        </li>
-                        <li data-theme="blue">
-                            <div class="blue"></div>
-                            <span>Blue</span>
-                        </li>
-                        <li data-theme="light-blue">
-                            <div class="light-blue"></div>
-                            <span>Light Blue</span>
-                        </li>
-                        <li data-theme="cyan">
-                            <div class="cyan"></div>
-                            <span>Cyan</span>
-                        </li>
-                        <li data-theme="teal">
-                            <div class="teal"></div>
-                            <span>Teal</span>
-                        </li>
-                        <li data-theme="green">
-                            <div class="green"></div>
-                            <span>Green</span>
-                        </li>
-                        <li data-theme="light-green">
-                            <div class="light-green"></div>
-                            <span>Light Green</span>
-                        </li>
-                        <li data-theme="lime">
-                            <div class="lime"></div>
-                            <span>Lime</span>
-                        </li>
-                        <li data-theme="yellow">
-                            <div class="yellow"></div>
-                            <span>Yellow</span>
-                        </li>
-                        <li data-theme="amber">
-                            <div class="amber"></div>
-                            <span>Amber</span>
-                        </li>
-                        <li data-theme="orange">
-                            <div class="orange"></div>
-                            <span>Orange</span>
-                        </li>
-                        <li data-theme="deep-orange">
-                            <div class="deep-orange"></div>
-                            <span>Deep Orange</span>
-                        </li>
-                        <li data-theme="brown">
-                            <div class="brown"></div>
-                            <span>Brown</span>
-                        </li>
-                        <li data-theme="grey">
-                            <div class="grey"></div>
-                            <span>Grey</span>
-                        </li>
-                        <li data-theme="blue-grey">
-                            <div class="blue-grey"></div>
-                            <span>Blue Grey</span>
-                        </li>
-                        <li data-theme="black">
-                            <div class="black"></div>
-                            <span>Black</span>
-                        </li>
-                    </ul>
-                </div>
-                <div role="tabpanel" class="tab-pane fade" id="settings">
-                    <div class="demo-settings">
-                        <p>GENERAL SETTINGS</p>
-                        <ul class="setting-list">
-                            <li>
-                                <span>Report Panel Usage</span>
-                                <div class="switch">
-                                    <label><input type="checkbox" checked><span class="lever"></span></label>
-                                </div>
-                            </li>
-                            <li>
-                                <span>Email Redirect</span>
-                                <div class="switch">
-                                    <label><input type="checkbox"><span class="lever"></span></label>
-                                </div>
-                            </li>
-                        </ul>
-                        <p>SYSTEM SETTINGS</p>
-                        <ul class="setting-list">
-                            <li>
-                                <span>Notifications</span>
-                                <div class="switch">
-                                    <label><input type="checkbox" checked><span class="lever"></span></label>
-                                </div>
-                            </li>
-                            <li>
-                                <span>Auto Updates</span>
-                                <div class="switch">
-                                    <label><input type="checkbox" checked><span class="lever"></span></label>
-                                </div>
-                            </li>
-                        </ul>
-                        <p>ACCOUNT SETTINGS</p>
-                        <ul class="setting-list">
-                            <li>
-                                <span>Offline</span>
-                                <div class="switch">
-                                    <label><input type="checkbox"><span class="lever"></span></label>
-                                </div>
-                            </li>
-                            <li>
-                                <span>Location Permission</span>
-                                <div class="switch">
-                                    <label><input type="checkbox" checked><span class="lever"></span></label>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </aside>
-        <!-- #END# Right Sidebar -->
     </section>
 
     <section class="content">
         <div class="container-fluid">
             <div class="block-header">
-                <ol class="breadcrumb">
-                    <li><a href="javascript:void(0);">Kelola Data</a></li>
-                    <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=3)</a></li>
-                    <li class="active">Variabel Stok</li>
-                </ol>
+                <div class="row clearfix">
+                    <ol class="breadcrumb">
+                        <li><a href="javascript:void(0);">Kelola Data</a></li>
+                        <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=3)</a></li>
+                        <li class="active">Variabel Stok</li>
+                    </ol>
+                </div>
             </div>
-
-            <!-- Widgets -->
             <div class="row clearfix">
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <div class="info-box bg-pink hover-expand-effect">
-                        <div class="icon">
-                            <i class="material-icons">equalizer</i>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                        <div class="header">
+                            <h2>
+                                Fungsi Keanggotaan Fuzzy Grid Partition K3 - Variabel Stok
+                            </h2>
                         </div>
-                        <div class="content">
-                            <div class="text">PERMINTAAN</div>
-                            <div class="number count-to" data-from="0" data-to="125" data-speed="15" data-fresh-interval="20"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                    <div class="info-box bg-purple hover-expand-effect">
-                        <div class="icon">
-                            <i class="material-icons">storage</i>
-                        </div>
-                        <div class="content">
-                            <div class="text">STOK</div>
-                            <div class="number count-to" data-from="0" data-to="243" data-speed="1000" data-fresh-interval="20"></div>
+                        <div class="body">
+                            <?php if (!$stokExists): ?>
+                                <a class="btn btn-primary" href="inputStokGridK3.php" role="button">Tambah Fungsi Keanggotaan</a>
+                            <?php else: ?>
+                                <button class="btn btn-primary" disabled>Tambah Fungsi Keanggotaan (Sudah ada data)</button>
+                            <?php endif; ?>
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Jenis</th>
+                                        <th>Nama Fungsi</th>
+                                        <th>Tipe</th>
+                                        <th>Batas Bawah</th>
+                                        <th>Batas Tengah</th>
+                                        <th>Batas Atas</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $nomor = 1;
+                                    while ($row = mysqli_fetch_assoc($result)) :
+                                    ?>
+                                        <tr>
+                                            <td><?php echo $nomor++ . '.'; ?></td>
+                                            <td><?php echo $row['jenis']; ?></td>
+                                            <td><?php echo $row['nama_fungsi']; ?></td>
+                                            <td><?php echo $row['tipe']; ?></td>
+                                            <td><?php echo $row['batas_bawah']; ?></td>
+                                            <td><?php echo $row['batas_tengah']; ?></td>
+                                            <td><?php echo $row['batas_atas']; ?></td>
+                                            <td>
+                                                <a href="editVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
+                                                <a href="hapusVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                            <canvas id="membershipChart" width="400" height="200"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- #END# Widgets -->
-        </div>
         </div>
     </section>
 
@@ -338,6 +217,118 @@
 
     <!-- Demo Js -->
     <script src="js/demo.js"></script>
+
+    <script>
+        fetch('getVStokGridK3.php')
+            .then(response => response.json())
+            .then(membershipData => {
+                var datasets = [];
+                membershipData.forEach(function(fungsi) {
+                    var dataPoints = [];
+                    if (fungsi.tipe === 'Menurun') {
+                        dataPoints = [{
+                                x: fungsi.batas_bawah,
+                                y: 1
+                            },
+                            {
+                                x: fungsi.batas_tengah || fungsi.batas_atas,
+                                y: 0
+                            },
+                            {
+                                x: fungsi.batas_atas,
+                                y: 0
+                            }
+                        ];
+                    } else if (fungsi.tipe === 'Menaik') {
+                        dataPoints = [{
+                                x: fungsi.batas_bawah,
+                                y: 0
+                            },
+                            {
+                                x: fungsi.batas_tengah || fungsi.batas_atas,
+                                y: 1
+                            },
+                            {
+                                x: fungsi.batas_atas,
+                                y: 1
+                            }
+                        ];
+                    } else { // Segitiga
+                        dataPoints = [{
+                                x: fungsi.batas_bawah,
+                                y: 0
+                            },
+                            {
+                                x: fungsi.batas_tengah,
+                                y: 1
+                            },
+                            {
+                                x: fungsi.batas_atas,
+                                y: 0
+                            }
+                        ];
+                    }
+
+                    datasets.push({
+                        label: fungsi.nama_fungsi,
+                        data: dataPoints,
+                        fill: false,
+                        borderColor: getRandomColor(),
+                        borderWidth: 2,
+                        lineTension: 0.1,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    });
+                });
+
+                var ctx = document.getElementById('membershipChart').getContext('2d');
+                var membershipChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: membershipData.map(f => f.nama_fungsi),
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            xAxes: [{
+                                type: 'linear',
+                                position: 'bottom',
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Nilai'
+                                }
+                            }],
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    max: 1,
+                                    min: 0,
+                                    stepSize: 0.1
+                                },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Keanggotaan'
+                                }
+                            }]
+                        },
+                        legend: {
+                            display: true
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+
 </body>
 
 </html>
