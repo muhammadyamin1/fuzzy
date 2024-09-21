@@ -130,40 +130,42 @@ $stokExists = mysqli_num_rows($result) > 0;
                             <?php else: ?>
                                 <button class="btn btn-primary" disabled>Tambah Fungsi Keanggotaan (Sudah ada data)</button>
                             <?php endif; ?>
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>No.</th>
-                                        <th>Jenis</th>
-                                        <th>Nama Fungsi</th>
-                                        <th>Tipe</th>
-                                        <th>Batas Bawah</th>
-                                        <th>Batas Tengah</th>
-                                        <th>Batas Atas</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php
-                                    $nomor = 1;
-                                    while ($row = mysqli_fetch_assoc($result)) :
-                                    ?>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
                                         <tr>
-                                            <td><?php echo $nomor++ . '.'; ?></td>
-                                            <td><?php echo $row['jenis']; ?></td>
-                                            <td><?php echo $row['nama_fungsi']; ?></td>
-                                            <td><?php echo $row['tipe']; ?></td>
-                                            <td><?php echo $row['batas_bawah']; ?></td>
-                                            <td><?php echo $row['batas_tengah']; ?></td>
-                                            <td><?php echo $row['batas_atas']; ?></td>
-                                            <td>
-                                                <a href="editVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
-                                                <a href="hapusVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
-                                            </td>
+                                            <th>No.</th>
+                                            <th>Jenis</th>
+                                            <th>Nama Fungsi</th>
+                                            <th>Tipe</th>
+                                            <th>Batas Bawah</th>
+                                            <th>Batas Tengah</th>
+                                            <th>Batas Atas</th>
+                                            <th>Aksi</th>
                                         </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        <?php
+                                        $nomor = 1;
+                                        while ($row = mysqli_fetch_assoc($result)) :
+                                        ?>
+                                            <tr>
+                                                <td><?php echo $nomor++ . '.'; ?></td>
+                                                <td><?php echo $row['jenis']; ?></td>
+                                                <td><?php echo $row['nama_fungsi']; ?></td>
+                                                <td><?php echo $row['tipe']; ?></td>
+                                                <td><?php echo $row['batas_bawah']; ?></td>
+                                                <td><?php echo $row['batas_tengah']; ?></td>
+                                                <td><?php echo $row['batas_atas']; ?></td>
+                                                <td>
+                                                    <a href="editVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-warning">Edit</a>
+                                                    <a href="hapusVStokGridK3.php?id=<?php echo $row['id']; ?>" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus data ini?')">Hapus</a>
+                                                </td>
+                                            </tr>
+                                        <?php endwhile; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                             <canvas id="membershipChart" width="400" height="200"></canvas>
                         </div>
                     </div>

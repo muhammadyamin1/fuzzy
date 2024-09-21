@@ -13,7 +13,7 @@
                 <span>Pengaturan Variabel</span>
             </a>
         </li>
-        <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'Tsukamoto.php') !== false || strpos($_SERVER['PHP_SELF'], 'GridK2.php') !== false || strpos($_SERVER['PHP_SELF'], 'GridK3.php') !== false ? 'active' : ''; ?>">
+        <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'Tsukamoto.php') !== false || strpos($_SERVER['PHP_SELF'], 'GridK2.php') !== false || strpos($_SERVER['PHP_SELF'], 'GridK3.php') !== false || strpos($_SERVER['PHP_SELF'], 'Grid-K2.php') !== false || strpos($_SERVER['PHP_SELF'], 'Grid-K3.php') !== false ? 'active' : ''; ?>">
             <a href="javascript:void(0);" class="menu-toggle">
                 <i class="material-icons">settings</i>
                 <span>Kelola Data</span>
@@ -85,18 +85,18 @@
                         </li>
                     </ul>
                 </li>
-                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'RuleTsukamoto.php') !== false ? 'active' : ''; ?>">
-                    <a href="RuleTsukamoto.php">
+                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'ruleTsukamoto.php') !== false ? 'active' : ''; ?>">
+                    <a href="ruleTsukamoto.php">
                         <span>Rule Fuzzy Tsukamoto</span>
                     </a>
                 </li>
-                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'RuleGridK2.php') !== false ? 'active' : ''; ?>">
-                    <a href="RuleGridK2.php">
+                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'ruleGrid-K2.php') !== false ? 'active' : ''; ?>">
+                    <a href="ruleGrid-K2.php">
                         <span>Rule Fuzzy Grid Partition (K=2)</span>
                     </a>
                 </li>
-                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'RuleGridK3.php') !== false ? 'active' : ''; ?>">
-                    <a href="RuleGridK3.php">
+                <li class="<?php echo strpos($_SERVER['PHP_SELF'], 'ruleGrid-K3.php') !== false ? 'active' : ''; ?>">
+                    <a href="ruleGrid-K3.php">
                         <span>Rule Fuzzy Grid Partition (K=3)</span>
                     </a>
                 </li>

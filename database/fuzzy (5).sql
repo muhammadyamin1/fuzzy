@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 21 Sep 2024 pada 19.28
+-- Waktu pembuatan: 21 Sep 2024 pada 21.57
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -71,6 +71,29 @@ INSERT INTO `fungsi_keanggotaan_gridk3` (`id`, `jenis`, `nama_fungsi`, `tipe`, `
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `rule_gridk3`
+--
+
+CREATE TABLE `rule_gridk3` (
+  `id` varchar(10) NOT NULL,
+  `permintaan` varchar(50) NOT NULL,
+  `stok` varchar(50) NOT NULL,
+  `produksi` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `rule_gridk3`
+--
+
+INSERT INTO `rule_gridk3` (`id`, `permintaan`, `stok`, `produksi`) VALUES
+('R1', 'SKS', 'CB', 'SKS'),
+('R2', 'SKS', 'B', 'SKS'),
+('R3', 'SKS', 'SB', 'SKS'),
+('R4', 'SKS', 'SBS', 'SKS');
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `users`
 --
 
@@ -99,6 +122,12 @@ INSERT INTO `users` (`id`, `nama`, `username`, `password`, `role`, `created_at`)
 -- Indeks untuk tabel `fungsi_keanggotaan_gridk3`
 --
 ALTER TABLE `fungsi_keanggotaan_gridk3`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeks untuk tabel `rule_gridk3`
+--
+ALTER TABLE `rule_gridk3`
   ADD PRIMARY KEY (`id`);
 
 --
