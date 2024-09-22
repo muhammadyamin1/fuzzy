@@ -119,7 +119,7 @@ include 'dbKoneksi.php';
                 <div class="row clearfix">
                     <ol class="breadcrumb">
                         <li><a href="javascript:void(0);">Kelola Data</a></li>
-                        <li class="active">Rule Fuzzy Grid Partition (K=3)</li>
+                        <li class="active">Rule Fuzzy Tsukamoto</li>
                     </ol>
                 </div>
             </div>
@@ -152,14 +152,14 @@ include 'dbKoneksi.php';
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Daftar Rule Fuzzy Grid Partition (K=3)
+                                Daftar Rule Fuzzy Tsukamoto
                             </h2>
                         </div>
                         <div class="body">
                             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ruleModal">
                                 Tambah Rule Fuzzy
                             </button>
-                            <a href="inputRuleGridK3.php" class="btn btn-info" role="button">Tambah Rule Horizontal</a>
+                            <a href="inputRuleTsukamoto.php" class="btn btn-info" role="button">Tambah Rule Horizontal</a>
 
                             <!-- Modal Input Rule -->
                             <div class="modal fade" id="ruleModal" tabindex="-1" role="dialog" aria-labelledby="ruleModalLabel">
@@ -171,7 +171,7 @@ include 'dbKoneksi.php';
                                             </button>
                                             <h4 class="modal-title" id="ruleModalLabel">Input Rule Fuzzy</h4>
                                         </div>
-                                        <form action="simpanRuleGridK3.php" method="POST">
+                                        <form action="simpanRuleTsukamoto.php" method="POST">
                                             <div class="modal-body">
                                                 <!-- Input manual untuk ID Rule -->
                                                 <label for="rule_id" class="control-label">ID Rule (Number, contoh: 1, 2, 3):</label>
@@ -186,7 +186,7 @@ include 'dbKoneksi.php';
                                                 <select name="permintaan" id="permintaan" class="form-control show-tick">
                                                     <?php
                                                     // Query untuk mengambil data Permintaan
-                                                    $queryPermintaan = "SELECT nama_fungsi FROM fungsi_keanggotaan_gridk3 WHERE jenis = 'Permintaan'";
+                                                    $queryPermintaan = "SELECT nama_fungsi FROM fungsi_keanggotaan_tsukamoto WHERE jenis = 'Permintaan'";
                                                     $resultPermintaan = $conn->query($queryPermintaan);
                                                     if ($resultPermintaan->num_rows > 0) {
                                                         while ($row = $resultPermintaan->fetch_assoc()) {
@@ -201,7 +201,7 @@ include 'dbKoneksi.php';
                                                 <select name="stok" id="stok" class="form-control">
                                                     <?php
                                                     // Query untuk mengambil data Stok
-                                                    $queryStok = "SELECT nama_fungsi FROM fungsi_keanggotaan_gridk3 WHERE jenis = 'Stok'";
+                                                    $queryStok = "SELECT nama_fungsi FROM fungsi_keanggotaan_tsukamoto WHERE jenis = 'Stok'";
                                                     $resultStok = $conn->query($queryStok);
                                                     if ($resultStok->num_rows > 0) {
                                                         while ($row = $resultStok->fetch_assoc()) {
@@ -216,7 +216,7 @@ include 'dbKoneksi.php';
                                                 <select name="produksi" id="produksi" class="form-control">
                                                     <?php
                                                     // Query untuk mengambil data Produksi
-                                                    $queryProduksi = "SELECT nama_fungsi FROM fungsi_keanggotaan_gridk3 WHERE jenis = 'Produksi'";
+                                                    $queryProduksi = "SELECT nama_fungsi FROM fungsi_keanggotaan_tsukamoto WHERE jenis = 'Produksi'";
                                                     $resultProduksi = $conn->query($queryProduksi);
                                                     if ($resultProduksi->num_rows > 0) {
                                                         while ($row = $resultProduksi->fetch_assoc()) {
@@ -251,7 +251,7 @@ include 'dbKoneksi.php';
                                     <tbody>
                                         <?php
                                         // Query untuk menampilkan data Rule yang ada
-                                        $queryRule = "SELECT id, permintaan, stok, produksi FROM rule_gridk3 ORDER BY CAST(SUBSTRING(id, 2) AS UNSIGNED)";
+                                        $queryRule = "SELECT id, permintaan, stok, produksi FROM rule_tsukamoto ORDER BY CAST(SUBSTRING(id, 2) AS UNSIGNED)";
                                         $resultRule = $conn->query($queryRule);
                                         if ($resultRule->num_rows > 0) {
                                             while ($row = $resultRule->fetch_assoc()) {
@@ -261,7 +261,7 @@ include 'dbKoneksi.php';
                                                     <td>{$row['stok']}</td>
                                                     <td>{$row['produksi']}</td>
                                                     <td class='action-center'>
-                                                        <a href='hapusRuleGridK3.php?id={$row['id']}' class='btn btn-danger' onclick=\"return confirm('Yakin ingin menghapus data ini?')\">Hapus</a>
+                                                        <a href='hapusRuleTsukamoto.php?id={$row['id']}' class='btn btn-danger' onclick=\"return confirm('Yakin ingin menghapus data ini?')\">Hapus</a>
                                                     </td>
                                                 </tr>";
                                             }

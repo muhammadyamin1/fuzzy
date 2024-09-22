@@ -228,7 +228,13 @@ include 'auth.php';
 
     <script>
         $(document).ready(function() {
+            // Mencegah perubahan nilai saat scroll pada input type number
+            $('input[type="number"]').on('wheel', function(e) {
+                e.preventDefault();
+            });
+
             let segitigaCount = 0;
+
             $('#addSegitiga').click(function() {
                 segitigaCount++;
                 $('#segitigaContainer').append(`
@@ -265,12 +271,29 @@ include 'auth.php';
                         <hr>
                     </div>
                 `);
+
+                // Menambahkan event listener untuk input baru
+                addFocusBlurEvent(`#segitiga${segitigaCount} input`);
+
+                $(`#segitiga${segitigaCount} input[type="number"]`).on('wheel', function(e) {
+                    e.preventDefault();
+                });
             });
 
             $(document).on('click', '.remove-segitiga', function() {
                 const id = $(this).data('id');
                 $(`#segitiga${id}`).remove();
             });
+
+            function addFocusBlurEvent(selector) {
+                $(selector).on('focus', function() {
+                    $(this).closest('.form-line').addClass('focused');
+                }).on('blur', function() {
+                    if (!$(this).val()) {
+                        $(this).closest('.form-line').removeClass('focused');
+                    }
+                });
+            }
         });
     </script>
 </body>

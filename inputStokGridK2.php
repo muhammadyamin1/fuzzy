@@ -103,8 +103,8 @@ include 'auth.php';
                 <div class="row clearfix">
                     <ol class="breadcrumb">
                         <li><a href="javascript:void(0);">Kelola Data</a></li>
-                        <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=3)</a></li>
-                        <li class="active">Variabel Permintaan</li>
+                        <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=2)</a></li>
+                        <li class="active">Variabel Stok</li>
                     </ol>
                 </div>
             </div>
@@ -113,11 +113,11 @@ include 'auth.php';
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Tambah Fungsi Keanggotaan Fuzzy Grid Partition K3 - Variabel Permintaan
+                                Tambah Fungsi Keanggotaan Fuzzy Grid Partition K2 - Variabel Stok
                             </h2>
                         </div>
                         <div class="body">
-                            <form action="simpanVPermintaanGridK3.php" method="POST">
+                            <form action="simpanVStokGridK2.php" method="POST">
                                 <label for="namaFungsiMenurun" class="control-label">Nama Fungsi (Kurva Menurun):</label>
                                 <div class="form-group">
                                     <div class="form-line">
@@ -168,11 +168,11 @@ include 'auth.php';
                                     </div>
                                 </div>
 
-                                <input type="hidden" name="jenis" value="Permintaan">
+                                <input type="hidden" name="jenis" value="Stok">
 
                                 <div class="form-group">
                                     <div class="text-right">
-                                        <a class="btn bg-grey waves-effect" role="button" href="vPermintaanGridK3.php">Kembali</a>
+                                        <a class="btn bg-grey waves-effect" role="button" href="vStokGridK2.php">Kembali</a>
                                         <button type="submit" class="btn btn-primary waves-effect">Simpan</button>
                                     </div>
                                 </div>

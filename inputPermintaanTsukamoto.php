@@ -103,7 +103,7 @@ include 'auth.php';
                 <div class="row clearfix">
                     <ol class="breadcrumb">
                         <li><a href="javascript:void(0);">Kelola Data</a></li>
-                        <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Grid Partition (K=3)</a></li>
+                        <li><a href="javascript:void(0);">Fungsi Keanggotaan Fuzzy Tsukamoto</a></li>
                         <li class="active">Variabel Permintaan</li>
                     </ol>
                 </div>
@@ -113,11 +113,11 @@ include 'auth.php';
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Tambah Fungsi Keanggotaan Fuzzy Grid Partition K3 - Variabel Permintaan
+                                Tambah Fungsi Keanggotaan Fuzzy Tsukamoto - Variabel Permintaan
                             </h2>
                         </div>
                         <div class="body">
-                            <form action="simpanVPermintaanGridK3.php" method="POST">
+                            <form action="simpanVPermintaanTsukamoto.php" method="POST">
                                 <label for="namaFungsiMenurun" class="control-label">Nama Fungsi (Kurva Menurun):</label>
                                 <div class="form-group">
                                     <div class="form-line">
@@ -172,7 +172,7 @@ include 'auth.php';
 
                                 <div class="form-group">
                                     <div class="text-right">
-                                        <a class="btn bg-grey waves-effect" role="button" href="vPermintaanGridK3.php">Kembali</a>
+                                        <a class="btn bg-grey waves-effect" role="button" href="vPermintaanTsukamoto.php">Kembali</a>
                                         <button type="submit" class="btn btn-primary waves-effect">Simpan</button>
                                     </div>
                                 </div>
