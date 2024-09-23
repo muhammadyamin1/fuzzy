@@ -250,10 +250,17 @@ if ($ExistsFungsiProduksi) {
                                                     } elseif ($tipe == 'menaik') {
                                                         $z = $a + $alpha_predikat * ($c - $a);
                                                     } elseif ($tipe == 'segitiga') {
-                                                        if ($alpha_predikat <= 1 && $b < $c) {
-                                                            $z = $c - $alpha_predikat * ($c - $b);
-                                                        } else {
-                                                            $z = $a + $alpha_predikat * ($b - $a);
+                                                        if ($alpha_predikat <= 1) {
+                                                            if ($b < $c) {
+                                                                // Jika berada di sebelah kiri batas tengah
+                                                                if ($alpha_predikat <= ($b - $a) / ($c - $a)) {
+                                                                    $z = $a + $alpha_predikat * ($b - $a);
+                                                                } else {
+                                                                    $z = $c - $alpha_predikat * ($c - $b);
+                                                                }
+                                                            } else {
+                                                                $z = $a + $alpha_predikat * ($b - $a);
+                                                            }
                                                         }
                                                     } else {
                                                         $z = 0; // Default jika tipe tidak dikenali
