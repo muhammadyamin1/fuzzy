@@ -267,8 +267,18 @@ if ($ExistsFungsiProduksi) {
                                                     }
 
                                                     // Update alpha_predikat dan z ke dalam database
-                                                    $update_query = "UPDATE rule_gridk3 SET alpha_predikat='$alpha_predikat', z='$z' WHERE id='{$row_rule['id']}'";
-                                                    mysqli_query($conn, $update_query);
+                                                    echo "Alpha Predikat: $alpha_predikat untuk rule ID: " . $row_rule['id'] . "<br>"; // Debugging tambahan
+
+                                                    if ($alpha_predikat > 0) { // Pastikan kondisi ini benar
+                                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='$alpha_predikat', z='$z' WHERE id='{$row_rule['id']}'";
+                                                        if (mysqli_query($conn, $update_query)) {
+                                                            echo "Update berhasil untuk rule ID: " . $row_rule['id'] . "<br>";
+                                                        } else {
+                                                            echo "Error saat mengupdate rule ID: " . $row_rule['id'] . " - " . mysqli_error($conn) . "<br>";
+                                                        }
+                                                    } else {
+                                                        echo "Alpha Predikat 0 atau tidak valid untuk rule ID: " . $row_rule['id'] . "<br>";
+                                                    }
 
                                                     // Simpan untuk perhitungan defuzzifikasi
                                                     $sum_alpha_z += $alpha_predikat * $z;
@@ -284,6 +294,19 @@ if ($ExistsFungsiProduksi) {
                                                     ];
                                                 }
                                             }
+                                        }
+                                    }
+                                }
+
+                                // Untuk rule yang tidak ada, set alpha_predikat dan z ke 0
+                                $all_rules_query = "SELECT id FROM rule_gridk3";
+                                $all_rules_result = mysqli_query($conn, $all_rules_query);
+
+                                while ($row_all_rule = mysqli_fetch_assoc($all_rules_result)) {
+                                    if (!in_array($row_all_rule['id'], array_column($rules_with_values, 'id'))) {
+                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='0', z='0' WHERE id='{$row_all_rule['id']}'";
+                                        if (!mysqli_query($conn, $update_query)) {
+                                            echo "Error saat mengupdate rule ID: " . $row_all_rule['id'] . " - " . mysqli_error($conn) . "<br>";
                                         }
                                     }
                                 }
@@ -311,7 +334,9 @@ if ($ExistsFungsiProduksi) {
                                             <tr>
                                                 <th>Rule</th>
                                                 <th>Permintaan</th>
+                                                <th>Derajat Keanggotaan Permintaan</th>
                                                 <th>Stok</th>
+                                                <th>Derajat Keanggotaan Stok</th>
                                                 <th>Alpha Predikat</th>
                                                 <th>Nilai Z</th>
                                             </tr>
@@ -321,7 +346,9 @@ if ($ExistsFungsiProduksi) {
                                                 <tr>
                                                     <td><?php echo $rule['id']; ?></td>
                                                     <td><?php echo $rule['permintaan']; ?></td>
+                                                    <td><?php echo number_format($derajat_keanggotaan_permintaan[$rule['permintaan']], 4); ?></td>
                                                     <td><?php echo $rule['stok']; ?></td>
+                                                    <td><?php echo number_format($derajat_keanggotaan_stok[$rule['stok']], 4); ?></td>
                                                     <td><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
                                                     <td><?php echo number_format($rule['z'], 2); ?></td>
                                                 </tr>
