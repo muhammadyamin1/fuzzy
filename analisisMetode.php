@@ -95,6 +95,25 @@ if ($ExistsFungsiProduksi) {
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
     <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+    <style>
+        .valign-middle {
+            vertical-align: middle !important;
+        }
+
+        @media print {
+
+            /* Sembunyikan elemen yang tidak ingin dicetak */
+            #printSection, #fuzzyForm, .search-bar {
+                display: none;
+            }
+
+            /* Lebarkan elemen content saat mencetak */
+            .print {
+                padding: 0;
+            }
+        }
+    </style>
 </head>
 
 <body class="theme-red">
@@ -122,7 +141,7 @@ if ($ExistsFungsiProduksi) {
         </div>
     </nav>
     <!-- #Top Bar -->
-    <section>
+    <section id="aside">
         <!-- Left Sidebar -->
         <aside id="leftsidebar" class="sidebar">
             <!-- User Info -->
@@ -142,7 +161,7 @@ if ($ExistsFungsiProduksi) {
         <!-- #END# Left Sidebar -->
     </section>
 
-    <section class="content">
+    <section class="content print">
         <div class="container-fluid">
             <div class="block-header">
                 <h2>ANALISIS SELURUH METODE</h2>
@@ -246,31 +265,33 @@ if ($ExistsFungsiProduksi) {
 
                                                     // Hitung z berdasarkan tipe
                                                     if ($tipe == 'menurun') {
+                                                        $z1 = 0; // Tidak ada z1 dan z2 untuk menurun
+                                                        $z2 = 0;
                                                         $z = $c - $alpha_predikat * ($c - $a);
+                                                        // Alpha predikat untuk menurun ditambahkan sekali
+                                                        $sum_alpha += $alpha_predikat;
                                                     } elseif ($tipe == 'menaik') {
+                                                        $z1 = 0; // Tidak ada z1 dan z2 untuk menaik
+                                                        $z2 = 0;
                                                         $z = $a + $alpha_predikat * ($c - $a);
+                                                        // Alpha predikat untuk menaik ditambahkan sekali
+                                                        $sum_alpha += $alpha_predikat;
                                                     } elseif ($tipe == 'segitiga') {
-                                                        if ($alpha_predikat <= 1) {
-                                                            if ($b < $c) {
-                                                                // Jika berada di sebelah kiri batas tengah
-                                                                if ($alpha_predikat <= ($b - $a) / ($c - $a)) {
-                                                                    $z = $a + $alpha_predikat * ($b - $a);
-                                                                } else {
-                                                                    $z = $c - $alpha_predikat * ($c - $b);
-                                                                }
-                                                            } else {
-                                                                $z = $a + $alpha_predikat * ($b - $a);
-                                                            }
-                                                        }
-                                                    } else {
-                                                        $z = 0; // Default jika tipe tidak dikenali
+                                                        // Untuk segitiga, hitung z1 (sisi kiri) dan z2 (sisi kanan)
+                                                        $z1 = $a + $alpha_predikat * ($b - $a);  // Sisi kiri
+                                                        $z2 = $c - $alpha_predikat * ($c - $b);  // Sisi kanan
+                                                        $z = $z1 + $z2;  // Menjumlahkan z1 dan z2 untuk pembilang
+
+                                                        // Alpha predikat untuk segitiga ditambahkan dua kali
+                                                        $sum_alpha += 2 * $alpha_predikat;
                                                     }
 
                                                     // Update alpha_predikat dan z ke dalam database
                                                     echo "Alpha Predikat: $alpha_predikat untuk rule ID: " . $row_rule['id'] . "<br>"; // Debugging tambahan
 
                                                     if ($alpha_predikat > 0) { // Pastikan kondisi ini benar
-                                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='$alpha_predikat', z='$z' WHERE id='{$row_rule['id']}'";
+                                                        // Update alpha_predikat, z, z1, dan z2 ke dalam database
+                                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='$alpha_predikat', z1='$z1', z2='$z2', z='$z' WHERE id='{$row_rule['id']}'";
                                                         if (mysqli_query($conn, $update_query)) {
                                                             echo "Update berhasil untuk rule ID: " . $row_rule['id'] . "<br>";
                                                         } else {
@@ -282,15 +303,17 @@ if ($ExistsFungsiProduksi) {
 
                                                     // Simpan untuk perhitungan defuzzifikasi
                                                     $sum_alpha_z += $alpha_predikat * $z;
-                                                    $sum_alpha += $alpha_predikat;
 
-                                                    // Simpan nilai untuk ditampilkan
                                                     $rules_with_values[] = [
                                                         'id' => $row_rule['id'],
                                                         'permintaan' => $permintaan_fungsi,
                                                         'stok' => $stok_fungsi,
+                                                        'produksi' => $produksi_fungsi,
                                                         'alpha_predikat' => $alpha_predikat,
-                                                        'z' => $z
+                                                        'z' => $z,
+                                                        'z1' => isset($z1) ? $z1 : null,  // Jika ada z1 (segitiga)
+                                                        'z2' => isset($z2) ? $z2 : null,  // Jika ada z2 (segitiga)
+                                                        'tipe' => $tipe  // Simpan tipe kurva
                                                     ];
                                                 }
                                             }
@@ -298,13 +321,13 @@ if ($ExistsFungsiProduksi) {
                                     }
                                 }
 
-                                // Untuk rule yang tidak ada, set alpha_predikat dan z ke 0
+                                // Untuk rule yang tidak ada, set alpha_predikat, z, z1, dan z2 ke 0
                                 $all_rules_query = "SELECT id FROM rule_gridk3";
                                 $all_rules_result = mysqli_query($conn, $all_rules_query);
 
                                 while ($row_all_rule = mysqli_fetch_assoc($all_rules_result)) {
                                     if (!in_array($row_all_rule['id'], array_column($rules_with_values, 'id'))) {
-                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='0', z='0' WHERE id='{$row_all_rule['id']}'";
+                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='0', z1='0', z2='0', z='0' WHERE id='{$row_all_rule['id']}'";
                                         if (!mysqli_query($conn, $update_query)) {
                                             echo "Error saat mengupdate rule ID: " . $row_all_rule['id'] . " - " . mysqli_error($conn) . "<br>";
                                         }
@@ -329,32 +352,42 @@ if ($ExistsFungsiProduksi) {
 
                                     <!-- Tabel Nilai Fungsi Implikasi -->
                                     <h4>Tabel Nilai Fungsi Implikasi</h4>
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>Rule</th>
-                                                <th>Permintaan</th>
-                                                <th>Derajat Keanggotaan Permintaan</th>
-                                                <th>Stok</th>
-                                                <th>Derajat Keanggotaan Stok</th>
-                                                <th>Alpha Predikat</th>
-                                                <th>Nilai Z</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php foreach ($rules_with_values as $rule): ?>
-                                                <tr>
-                                                    <td><?php echo $rule['id']; ?></td>
-                                                    <td><?php echo $rule['permintaan']; ?></td>
-                                                    <td><?php echo number_format($derajat_keanggotaan_permintaan[$rule['permintaan']], 4); ?></td>
-                                                    <td><?php echo $rule['stok']; ?></td>
-                                                    <td><?php echo number_format($derajat_keanggotaan_stok[$rule['stok']], 4); ?></td>
-                                                    <td><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
-                                                    <td><?php echo number_format($rule['z'], 2); ?></td>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped table-hover">
+                                            <thead>
+                                                <tr class="bg-blue-grey">
+                                                    <th class="text-center valign-middle">Rule</th>
+                                                    <th class="text-center valign-middle">Permintaan</th>
+                                                    <th class="text-center valign-middle">Derajat Keanggotaan Permintaan</th>
+                                                    <th class="text-center valign-middle">Stok</th>
+                                                    <th class="text-center valign-middle">Derajat Keanggotaan Stok</th>
+                                                    <th class="text-center valign-middle">Produksi</th>
+                                                    <th class="text-center valign-middle">Tipe Kurva</th>
+                                                    <th class="text-center valign-middle">Alpha Predikat</th>
+                                                    <th class="text-center valign-middle">Nilai Z1</th>
+                                                    <th class="text-center valign-middle">Nilai Z2</th>
+                                                    <th class="text-center valign-middle">Nilai Z</th>
                                                 </tr>
-                                            <?php endforeach; ?>
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($rules_with_values as $rule): ?>
+                                                    <tr>
+                                                        <td class="text-center"><?php echo $rule['id']; ?></td>
+                                                        <td class="text-center"><?php echo $rule['permintaan']; ?></td>
+                                                        <td class="text-center"><?php echo number_format($derajat_keanggotaan_permintaan[$rule['permintaan']], 4); ?></td>
+                                                        <td class="text-center"><?php echo $rule['stok']; ?></td>
+                                                        <td class="text-center"><?php echo number_format($derajat_keanggotaan_stok[$rule['stok']], 4); ?></td>
+                                                        <td class="text-center"><?php echo $rule['produksi']; ?></td>
+                                                        <td class="text-center"><?php echo ucfirst($rule['tipe']); ?></td> <!-- Menampilkan tipe kurva -->
+                                                        <td class="text-center"><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
+                                                        <td class="text-center"><?php echo isset($rule['z1']) ? number_format($rule['z1'], 2) : '-'; ?></td> <!-- Nilai Z1 untuk segitiga -->
+                                                        <td class="text-center"><?php echo isset($rule['z2']) ? number_format($rule['z2'], 2) : '-'; ?></td> <!-- Nilai Z2 untuk segitiga -->
+                                                        <td class="text-center"><?php echo number_format($rule['z'], 2); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
 
                                     <!-- Bar Chart -->
                                     <h4>Diagram Batang</h4>
@@ -363,7 +396,7 @@ if ($ExistsFungsiProduksi) {
 
                                 <!-- Print Button -->
                                 <div id="printSection" class="text-center">
-                                    <button onclick="window.print()" class="btn btn-success">Print Halaman</button>
+                                    <button onclick="printContent()" class="btn btn-success">Print Halaman</button>
                                 </div>
                             <?php endif; ?>
 
@@ -442,6 +475,31 @@ if ($ExistsFungsiProduksi) {
                 }
             }
         });
+
+        function printContent() {
+            // Hapus kelas 'section'
+            var sectionElement = document.querySelector('.content');
+            if (sectionElement) {
+                sectionElement.classList.remove('content');
+            }
+
+            // Hapus elemen dengan ID aside
+            var asideElement = document.getElementById('aside');
+            if (asideElement) {
+                asideElement.style.display = 'none'; // Sembunyikan aside
+            }
+
+            // Lakukan print
+            window.print();
+
+            // Setelah print, tambahkan kembali kelas 'section' dan tampilkan aside
+            if (sectionElement) {
+                sectionElement.classList.add('content');
+            }
+            if (asideElement) {
+                asideElement.style.display = ''; // Kembalikan aside ke tampilan semula
+            }
+        }
     </script>
 
 </body>
