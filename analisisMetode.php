@@ -2,24 +2,6 @@
 include 'auth.php';
 include 'dbKoneksi.php'; // Koneksi ke database
 
-// Ambil data dari tabel fungsi keanggotaan untuk permintaan, stok, dan produksi
-$query_fungsi_permintaan = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Permintaan' ORDER BY batas_atas ASC;";
-$query_fungsi_stok = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok' ORDER BY batas_atas ASC;";
-$query_fungsi_produksi = "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Produksi' ORDER BY batas_atas ASC;";
-
-$result_fungsi_permintaan = mysqli_query($conn, $query_fungsi_permintaan);
-$result_fungsi_stok = mysqli_query($conn, $query_fungsi_stok);
-$result_fungsi_produksi = mysqli_query($conn, $query_fungsi_produksi);
-
-// Ambil data dari tabel rule
-$query_rule = "SELECT * FROM rule_gridk3;";
-$result_rule = mysqli_query($conn, $query_rule);
-
-$ExistsFungsiPermintaan = mysqli_num_rows($result_fungsi_permintaan) > 0;
-$ExistsFungsiStok = mysqli_num_rows($result_fungsi_stok) > 0;
-$ExistsFungsiProduksi = mysqli_num_rows($result_fungsi_produksi) > 0;
-$ExistsRule = mysqli_num_rows($result_rule) > 0;
-
 // Fungsi untuk menghitung derajat keanggotaan
 function hitungKeanggotaan($x, $a, $b, $c, $tipe)
 {
@@ -55,12 +37,119 @@ function hitungKeanggotaan($x, $a, $b, $c, $tipe)
     return 0;  // Jika tipe tidak sesuai, kembalikan 0
 }
 
-// Ambil fungsi keanggotaan untuk produksi
-$fungsi_produksi = [];
-if ($ExistsFungsiProduksi) {
-    while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_produksi)) {
-        $fungsi_produksi[$row_fungsi['nama_fungsi']] = $row_fungsi;
+// Fungsi untuk perhitungan dari setiap metode
+function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $table_name)
+{
+    global $conn;
+    $sum_alpha_z = 0;
+    $sum_alpha = 0;
+    $rules_with_values = [];
+
+    // Hitung derajat keanggotaan permintaan dan stok
+    $derajat_keanggotaan_permintaan = [];
+    $derajat_keanggotaan_stok = [];
+    $tipe_keanggotaan = [];
+
+    // Simpan tipe dan nilai derajat keanggotaan dari fungsi permintaan
+    mysqli_data_seek($result_fungsi_permintaan, 0);
+    while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_permintaan)) {
+        $tipe_keanggotaan[$row_fungsi['nama_fungsi']] = strtolower($row_fungsi['tipe']);
+        // Menghitung derajat keanggotaan dan membatasi hasil menjadi tiga angka di belakang koma
+        $nilai_keanggotaan_permintaan = hitungKeanggotaan($_POST['permintaan'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
+        $nilai_keanggotaan_permintaan = round($nilai_keanggotaan_permintaan, 3); // Membatasi menjadi tiga angka di belakang koma
+
+        // Menyimpan nilai ke dalam array
+        $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_permintaan;
+        echo "Derajat keanggotaan untuk fungsi " . $row_fungsi['nama_fungsi'] . " adalah: " . $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] . "<br>";
     }
+
+    // Simpan tipe dan nilai derajat keanggotaan dari fungsi stok
+    mysqli_data_seek($result_fungsi_stok, 0);
+    while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_stok)) {
+        $tipe_keanggotaan[$row_fungsi['nama_fungsi']] = strtolower($row_fungsi['tipe']);
+        // Menghitung derajat keanggotaan untuk stok dan membatasi hasil menjadi tiga angka di belakang koma
+        $nilai_keanggotaan_stok = hitungKeanggotaan($_POST['stok'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
+        $nilai_keanggotaan_stok = round($nilai_keanggotaan_stok, 3); // Membatasi menjadi tiga angka di belakang koma
+
+        // Menyimpan nilai ke dalam array
+        $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_stok;
+        echo "Derajat keanggotaan untuk stok pada fungsi " . $row_fungsi['nama_fungsi'] . " adalah: " . $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] . "<br>";
+    }
+
+    // Loop setiap rule dan hitung alpha_predikat dan z
+    $ExistsRule = mysqli_num_rows($result_rule) > 0;
+    if ($ExistsRule) {
+        mysqli_data_seek($result_rule, 0);
+        while ($row_rule = mysqli_fetch_assoc($result_rule)) {
+            $permintaan_fungsi = $row_rule['permintaan'];
+            $stok_fungsi = $row_rule['stok'];
+            $produksi_fungsi = $row_rule['produksi'];
+
+            if (isset($derajat_keanggotaan_permintaan[$permintaan_fungsi]) && isset($derajat_keanggotaan_stok[$stok_fungsi])) {
+                $alpha_predikat = min($derajat_keanggotaan_permintaan[$permintaan_fungsi], $derajat_keanggotaan_stok[$stok_fungsi]);
+                $alpha_predikat = round($alpha_predikat, 3);
+                echo "Alpha predikat untuk permintaan fungsi " . $permintaan_fungsi . " dan stok fungsi " . $stok_fungsi . " adalah: " . $alpha_predikat . "<br>";
+
+                if ($alpha_predikat > 0) {
+                    // Ambil data batas dari tabel fungsi_keanggotaan untuk produksi
+                    $query_fungsi_produksi = "SELECT batas_bawah, batas_tengah, batas_atas, tipe FROM fungsi_keanggotaan_" . $table_name . " WHERE nama_fungsi='$produksi_fungsi' AND jenis='produksi'";
+                    $result_fungsi_produksi = mysqli_query($conn, $query_fungsi_produksi);
+
+                    // Pastikan data ditemukan sebelum akses array
+                    if ($fungsi_produksi = mysqli_fetch_assoc($result_fungsi_produksi)) {
+                        $a = $fungsi_produksi['batas_bawah'];
+                        $b = $fungsi_produksi['batas_tengah'];
+                        $c = $fungsi_produksi['batas_atas'];
+                        $tipe = strtolower($fungsi_produksi['tipe']);
+
+                        // Hitung z berdasarkan tipe
+                        if ($tipe == 'menurun') {
+                            $z1 = 0;  // Tidak ada z1 dan z2 untuk menurun
+                            $z2 = 0;
+                            $z = $c - $alpha_predikat * ($c - $a);
+                            $z = round($z, 3);
+                            $sum_alpha += $alpha_predikat;
+                        } elseif ($tipe == 'menaik') {
+                            $z1 = 0;  // Tidak ada z1 dan z2 untuk menaik
+                            $z2 = 0;
+                            $z = $a + $alpha_predikat * ($c - $a);
+                            $z = round($z, 3);
+                            $sum_alpha += $alpha_predikat;
+                        } elseif ($tipe == 'segitiga') {
+                            $z1 = $a + $alpha_predikat * ($b - $a);  // Sisi kiri
+                            $z2 = $c - $alpha_predikat * ($c - $b);  // Sisi kanan
+                            $z1 = round($z1, 3);
+                            $z2 = round($z2, 3);
+                            echo 'z1: '.$z1.'<br>';
+                            echo 'z2: '.$z2.'<br>';
+                            $z = $z1 + $z2;  // Menjumlahkan z1 dan z2 untuk pembilang
+                            $sum_alpha += 2 * $alpha_predikat;  // Alpha predikat untuk segitiga ditambahkan dua kali
+                        }
+
+                        // Simpan hasil alpha_predikat dan z
+                        $sum_alpha_z += $alpha_predikat * $z;
+
+                        // Simpan hasilnya untuk ditampilkan
+                        $rules_with_values[] = [
+                            'id' => $row_rule['id'],
+                            'permintaan' => $permintaan_fungsi,
+                            'stok' => $stok_fungsi,
+                            'produksi' => $produksi_fungsi,
+                            'alpha_predikat' => $alpha_predikat,
+                            'z' => $z,
+                            'z1' => $z1,
+                            'z2' => $z2,
+                            'tipe' => $tipe
+                        ];
+                    } else {
+                        echo "Error: Fungsi keanggotaan untuk produksi '$produksi_fungsi' tidak ditemukan.<br>";
+                    }
+                }
+            }
+        }
+    }
+
+    return ['rules' => $rules_with_values, 'produksi' => $sum_alpha_z / $sum_alpha];
 }
 ?>
 <!DOCTYPE html>
@@ -104,7 +193,9 @@ if ($ExistsFungsiProduksi) {
         @media print {
 
             /* Sembunyikan elemen yang tidak ingin dicetak */
-            #printSection, #fuzzyForm, .search-bar {
+            #printSection,
+            #fuzzyForm,
+            .search-bar {
                 display: none;
             }
 
@@ -201,154 +292,44 @@ if ($ExistsFungsiProduksi) {
 
                             <?php if ($_SERVER['REQUEST_METHOD'] == 'POST'): ?>
                                 <?php
-                                // Ambil input dari form
-                                $permintaan = $_POST['permintaan'];
-                                $stok = $_POST['stok'];
+                                // Ambil data dari tabel fungsi keanggotaan untuk K3, K2, dan Tsukamoto
+                                $result_fungsi_permintaan_k3 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Permintaan' ORDER BY batas_atas ASC;");
+                                $result_fungsi_stok_k3 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok' ORDER BY batas_atas ASC;");
+                                $result_fungsi_produksi_k3 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Produksi' ORDER BY batas_atas ASC;");
+                                $result_rule_k3 = mysqli_query($conn, "SELECT * FROM rule_gridk3;");
 
-                                // Inisialisasi
-                                $sum_alpha_z = 0;
-                                $sum_alpha = 0;
+                                $result_fungsi_permintaan_k2 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk2 WHERE jenis='Permintaan' ORDER BY batas_atas ASC;");
+                                $result_fungsi_stok_k2 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk2 WHERE jenis='Stok' ORDER BY batas_atas ASC;");
+                                $result_fungsi_produksi_k2 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk2 WHERE jenis='Produksi' ORDER BY batas_atas ASC;");
+                                $result_rule_k2 = mysqli_query($conn, "SELECT * FROM rule_gridk2;");
 
-                                // Menghitung derajat keanggotaan dari permintaan dan stok
-                                $derajat_keanggotaan_permintaan = [];
-                                $derajat_keanggotaan_stok = [];
+                                $result_fungsi_permintaan_tsukamoto = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_tsukamoto WHERE jenis='Permintaan' ORDER BY batas_atas ASC;");
+                                $result_fungsi_stok_tsukamoto = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_tsukamoto WHERE jenis='Stok' ORDER BY batas_atas ASC;");
+                                $result_fungsi_produksi_tsukamoto = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_tsukamoto WHERE jenis='Produksi' ORDER BY batas_atas ASC;");
+                                $result_rule_tsukamoto = mysqli_query($conn, "SELECT * FROM rule_tsukamoto;");
 
-                                // Hitung derajat keanggotaan untuk permintaan
-                                if ($ExistsFungsiPermintaan) {
-                                    mysqli_data_seek($result_fungsi_permintaan, 0);
-                                    while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_permintaan)) {
-                                        $tipe = strtolower($row_fungsi['tipe']);
-                                        $a = $row_fungsi['batas_bawah'];
-                                        $b = $row_fungsi['batas_tengah'];
-                                        $c = $row_fungsi['batas_atas'];
+                                // Perhitungan Fuzzy Grid Partition K3
+                                $result_k3 = hitungFuzzy($result_fungsi_permintaan_k3, $result_fungsi_stok_k3, $result_fungsi_produksi_k3, $result_rule_k3, 'gridk3');
+                                $rules_with_values_k3 = $result_k3['rules'];
+                                $produksi_k3 = $result_k3['produksi'];
 
-                                        $derajat = hitungKeanggotaan($permintaan, $a, $b, $c, $tipe);
-                                        $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] = $derajat;
-                                    }
-                                }
+                                // Perhitungan Fuzzy Grid Partition K2
+                                $result_k2 = hitungFuzzy($result_fungsi_permintaan_k2, $result_fungsi_stok_k2, $result_fungsi_produksi_k2, $result_rule_k2, 'gridk2');
+                                $rules_with_values_k2 = $result_k2['rules'];
+                                $produksi_k2 = $result_k2['produksi'];
 
-                                // Hitung derajat keanggotaan untuk stok
-                                if ($ExistsFungsiStok) {
-                                    mysqli_data_seek($result_fungsi_stok, 0);
-                                    while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_stok)) {
-                                        $tipe = strtolower($row_fungsi['tipe']);
-                                        $a = $row_fungsi['batas_bawah'];
-                                        $b = $row_fungsi['batas_tengah'];
-                                        $c = $row_fungsi['batas_atas'];
-
-                                        $derajat = hitungKeanggotaan($stok, $a, $b, $c, $tipe);
-                                        $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] = $derajat;
-                                    }
-                                }
-
-                                // Loop through each rule and calculate alpha_predikat and z
-                                $rules_with_values = []; // Array untuk menyimpan nilai alpha_predikat dan z
-
-                                if ($ExistsRule) {
-                                    mysqli_data_seek($result_rule, 0);
-                                    while ($row_rule = mysqli_fetch_assoc($result_rule)) {
-                                        $permintaan_fungsi = $row_rule['permintaan'];
-                                        $stok_fungsi = $row_rule['stok'];
-                                        $produksi_fungsi = $row_rule['produksi'];
-
-                                        if (isset($derajat_keanggotaan_permintaan[$permintaan_fungsi]) && isset($derajat_keanggotaan_stok[$stok_fungsi])) {
-                                            $alpha_predikat = min($derajat_keanggotaan_permintaan[$permintaan_fungsi], $derajat_keanggotaan_stok[$stok_fungsi]);
-
-                                            if ($alpha_predikat > 0) {
-                                                // Dapatkan fungsi keanggotaan untuk produksi
-                                                if (isset($fungsi_produksi[$produksi_fungsi])) {
-                                                    $fungsi = $fungsi_produksi[$produksi_fungsi];
-                                                    $tipe = strtolower($fungsi['tipe']);
-                                                    $a = $fungsi['batas_bawah'];
-                                                    $b = $fungsi['batas_tengah'];
-                                                    $c = $fungsi['batas_atas'];
-
-                                                    // Hitung z berdasarkan tipe
-                                                    if ($tipe == 'menurun') {
-                                                        $z1 = 0; // Tidak ada z1 dan z2 untuk menurun
-                                                        $z2 = 0;
-                                                        $z = $c - $alpha_predikat * ($c - $a);
-                                                        // Alpha predikat untuk menurun ditambahkan sekali
-                                                        $sum_alpha += $alpha_predikat;
-                                                    } elseif ($tipe == 'menaik') {
-                                                        $z1 = 0; // Tidak ada z1 dan z2 untuk menaik
-                                                        $z2 = 0;
-                                                        $z = $a + $alpha_predikat * ($c - $a);
-                                                        // Alpha predikat untuk menaik ditambahkan sekali
-                                                        $sum_alpha += $alpha_predikat;
-                                                    } elseif ($tipe == 'segitiga') {
-                                                        // Untuk segitiga, hitung z1 (sisi kiri) dan z2 (sisi kanan)
-                                                        $z1 = $a + $alpha_predikat * ($b - $a);  // Sisi kiri
-                                                        $z2 = $c - $alpha_predikat * ($c - $b);  // Sisi kanan
-                                                        $z = $z1 + $z2;  // Menjumlahkan z1 dan z2 untuk pembilang
-
-                                                        // Alpha predikat untuk segitiga ditambahkan dua kali
-                                                        $sum_alpha += 2 * $alpha_predikat;
-                                                    }
-
-                                                    // Update alpha_predikat dan z ke dalam database
-                                                    echo "Alpha Predikat: $alpha_predikat untuk rule ID: " . $row_rule['id'] . "<br>"; // Debugging tambahan
-
-                                                    if ($alpha_predikat > 0) { // Pastikan kondisi ini benar
-                                                        // Update alpha_predikat, z, z1, dan z2 ke dalam database
-                                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='$alpha_predikat', z1='$z1', z2='$z2', z='$z' WHERE id='{$row_rule['id']}'";
-                                                        if (mysqli_query($conn, $update_query)) {
-                                                            echo "Update berhasil untuk rule ID: " . $row_rule['id'] . "<br>";
-                                                        } else {
-                                                            echo "Error saat mengupdate rule ID: " . $row_rule['id'] . " - " . mysqli_error($conn) . "<br>";
-                                                        }
-                                                    } else {
-                                                        echo "Alpha Predikat 0 atau tidak valid untuk rule ID: " . $row_rule['id'] . "<br>";
-                                                    }
-
-                                                    // Simpan untuk perhitungan defuzzifikasi
-                                                    $sum_alpha_z += $alpha_predikat * $z;
-
-                                                    $rules_with_values[] = [
-                                                        'id' => $row_rule['id'],
-                                                        'permintaan' => $permintaan_fungsi,
-                                                        'stok' => $stok_fungsi,
-                                                        'produksi' => $produksi_fungsi,
-                                                        'alpha_predikat' => $alpha_predikat,
-                                                        'z' => $z,
-                                                        'z1' => isset($z1) ? $z1 : null,  // Jika ada z1 (segitiga)
-                                                        'z2' => isset($z2) ? $z2 : null,  // Jika ada z2 (segitiga)
-                                                        'tipe' => $tipe  // Simpan tipe kurva
-                                                    ];
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // Untuk rule yang tidak ada, set alpha_predikat, z, z1, dan z2 ke 0
-                                $all_rules_query = "SELECT id FROM rule_gridk3";
-                                $all_rules_result = mysqli_query($conn, $all_rules_query);
-
-                                while ($row_all_rule = mysqli_fetch_assoc($all_rules_result)) {
-                                    if (!in_array($row_all_rule['id'], array_column($rules_with_values, 'id'))) {
-                                        $update_query = "UPDATE rule_gridk3 SET alpha_predikat='0', z1='0', z2='0', z='0' WHERE id='{$row_all_rule['id']}'";
-                                        if (!mysqli_query($conn, $update_query)) {
-                                            echo "Error saat mengupdate rule ID: " . $row_all_rule['id'] . " - " . mysqli_error($conn) . "<br>";
-                                        }
-                                    }
-                                }
-
-                                // Defuzzifikasi
-                                if ($sum_alpha > 0) {
-                                    $produksi = $sum_alpha_z / $sum_alpha;
-                                } else {
-                                    $produksi = 0;
-                                    echo "<p>Error: Tidak ada alpha predikat yang valid.</p>";
-                                }
+                                // Perhitungan Fuzzy Tsukamoto
+                                $result_tsukamoto = hitungFuzzy($result_fungsi_permintaan_tsukamoto, $result_fungsi_stok_tsukamoto, $result_fungsi_produksi_tsukamoto, $result_rule_tsukamoto, 'tsukamoto');
+                                $rules_with_values_tsukamoto = $result_tsukamoto['rules'];
+                                $produksi_tsukamoto = $result_tsukamoto['produksi'];
                                 ?>
 
                                 <!-- Menampilkan hasil perhitungan -->
                                 <div id="resultSection">
                                     <h3>Hasil Perhitungan</h3>
-                                    <p><strong>Permintaan:</strong> <?php echo $permintaan; ?></p>
-                                    <p><strong>Stok:</strong> <?php echo $stok; ?></p>
-                                    <p><strong>Produksi (Hasil Defuzzifikasi):</strong> <?php echo number_format($produksi, 2); ?></p>
+                                    <p><strong>Permintaan:</strong> <?php echo $_POST['permintaan']; ?></p>
+                                    <p><strong>Stok:</strong> <?php echo $_POST['stok']; ?></p>
+                                    <p><strong>Produksi (Hasil Defuzzifikasi):</strong> <?php echo number_format($produksi_k3, 2, ',', '.'); ?></p>
 
                                     <!-- Tabel Nilai Fungsi Implikasi -->
                                     <h4>Tabel Nilai Fungsi Implikasi</h4>
@@ -370,7 +351,7 @@ if ($ExistsFungsiProduksi) {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($rules_with_values as $rule): ?>
+                                                <?php foreach ($rules_with_values_k3 as $rule): ?>
                                                     <tr>
                                                         <td class="text-center"><?php echo $rule['id']; ?></td>
                                                         <td class="text-center"><?php echo $rule['permintaan']; ?></td>
@@ -456,10 +437,21 @@ if ($ExistsFungsiProduksi) {
             data: {
                 labels: ['Permintaan', 'Stok', 'Produksi'],
                 datasets: [{
-                    label: 'Jumlah',
-                    data: [<?php echo $permintaan; ?>, <?php echo $stok; ?>, <?php echo $produksi; ?>],
-                    backgroundColor: ['#3498db', '#2ecc71', '#e74c3c']
-                }]
+                        label: 'Fuzzy Grid Partition K3',
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_k3; ?>],
+                        backgroundColor: '#3498db'
+                    },
+                    {
+                        label: 'Fuzzy Grid Partition K2',
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_k2; ?>],
+                        backgroundColor: '#2ecc71'
+                    },
+                    {
+                        label: 'Fuzzy Tsukamoto',
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_tsukamoto; ?>],
+                        backgroundColor: '#e74c3c'
+                    }
+                ]
             },
             options: {
                 responsive: true,
