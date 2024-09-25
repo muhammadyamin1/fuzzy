@@ -38,7 +38,7 @@ function hitungKeanggotaan($x, $a, $b, $c, $tipe)
 }
 
 // Fungsi untuk perhitungan dari setiap metode
-function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $table_name)
+function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $table_name, &$derajat_keanggotaan_permintaan, &$derajat_keanggotaan_stok)
 {
     global $conn;
     $sum_alpha_z = 0;
@@ -46,34 +46,27 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
     $rules_with_values = [];
 
     // Hitung derajat keanggotaan permintaan dan stok
-    $derajat_keanggotaan_permintaan = [];
-    $derajat_keanggotaan_stok = [];
+    $derajat_keanggotaan_permintaan_k3 = [];
+    $derajat_keanggotaan_stok_k3 = [];
+    $derajat_keanggotaan_permintaan_k2 = [];
+    $derajat_keanggotaan_stok_k2 = [];
+    $derajat_keanggotaan_permintaan_tsukamoto = [];
+    $derajat_keanggotaan_stok_tsukamoto = [];
     $tipe_keanggotaan = [];
 
-    // Simpan tipe dan nilai derajat keanggotaan dari fungsi permintaan
+    // Hitung derajat keanggotaan permintaan dan stok
     mysqli_data_seek($result_fungsi_permintaan, 0);
     while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_permintaan)) {
-        $tipe_keanggotaan[$row_fungsi['nama_fungsi']] = strtolower($row_fungsi['tipe']);
-        // Menghitung derajat keanggotaan dan membatasi hasil menjadi tiga angka di belakang koma
         $nilai_keanggotaan_permintaan = hitungKeanggotaan($_POST['permintaan'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
         $nilai_keanggotaan_permintaan = round($nilai_keanggotaan_permintaan, 3); // Membatasi menjadi tiga angka di belakang koma
-
-        // Menyimpan nilai ke dalam array
         $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_permintaan;
-        echo "Derajat keanggotaan untuk fungsi " . $row_fungsi['nama_fungsi'] . " adalah: " . $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] . "<br>";
     }
 
-    // Simpan tipe dan nilai derajat keanggotaan dari fungsi stok
     mysqli_data_seek($result_fungsi_stok, 0);
     while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_stok)) {
-        $tipe_keanggotaan[$row_fungsi['nama_fungsi']] = strtolower($row_fungsi['tipe']);
-        // Menghitung derajat keanggotaan untuk stok dan membatasi hasil menjadi tiga angka di belakang koma
         $nilai_keanggotaan_stok = hitungKeanggotaan($_POST['stok'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
-        $nilai_keanggotaan_stok = round($nilai_keanggotaan_stok, 3); // Membatasi menjadi tiga angka di belakang koma
-
-        // Menyimpan nilai ke dalam array
+        $nilai_keanggotaan_stok = round($nilai_keanggotaan_stok, 3);
         $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_stok;
-        echo "Derajat keanggotaan untuk stok pada fungsi " . $row_fungsi['nama_fungsi'] . " adalah: " . $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] . "<br>";
     }
 
     // Loop setiap rule dan hitung alpha_predikat dan z
@@ -88,7 +81,6 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
             if (isset($derajat_keanggotaan_permintaan[$permintaan_fungsi]) && isset($derajat_keanggotaan_stok[$stok_fungsi])) {
                 $alpha_predikat = min($derajat_keanggotaan_permintaan[$permintaan_fungsi], $derajat_keanggotaan_stok[$stok_fungsi]);
                 $alpha_predikat = round($alpha_predikat, 3);
-                echo "Alpha predikat untuk permintaan fungsi " . $permintaan_fungsi . " dan stok fungsi " . $stok_fungsi . " adalah: " . $alpha_predikat . "<br>";
 
                 if ($alpha_predikat > 0) {
                     // Ambil data batas dari tabel fungsi_keanggotaan untuk produksi
@@ -120,8 +112,6 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                             $z2 = $c - $alpha_predikat * ($c - $b);  // Sisi kanan
                             $z1 = round($z1, 3);
                             $z2 = round($z2, 3);
-                            echo 'z1: '.$z1.'<br>';
-                            echo 'z2: '.$z2.'<br>';
                             $z = $z1 + $z2;  // Menjumlahkan z1 dan z2 untuk pembilang
                             $sum_alpha += 2 * $alpha_predikat;  // Alpha predikat untuk segitiga ditambahkan dua kali
                         }
@@ -191,6 +181,12 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
         }
 
         @media print {
+
+            #barChartDiv,
+            .resultSectionGridK2,
+            .resultSectionGridK3 {
+                page-break-before: always;
+            }
 
             /* Sembunyikan elemen yang tidak ingin dicetak */
             #printSection,
@@ -309,19 +305,60 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                 $result_rule_tsukamoto = mysqli_query($conn, "SELECT * FROM rule_tsukamoto;");
 
                                 // Perhitungan Fuzzy Grid Partition K3
-                                $result_k3 = hitungFuzzy($result_fungsi_permintaan_k3, $result_fungsi_stok_k3, $result_fungsi_produksi_k3, $result_rule_k3, 'gridk3');
+                                $result_k3 = hitungFuzzy($result_fungsi_permintaan_k3, $result_fungsi_stok_k3, $result_fungsi_produksi_k3, $result_rule_k3, 'gridk3', $derajat_keanggotaan_permintaan_k3, $derajat_keanggotaan_stok_k3);
                                 $rules_with_values_k3 = $result_k3['rules'];
                                 $produksi_k3 = $result_k3['produksi'];
 
                                 // Perhitungan Fuzzy Grid Partition K2
-                                $result_k2 = hitungFuzzy($result_fungsi_permintaan_k2, $result_fungsi_stok_k2, $result_fungsi_produksi_k2, $result_rule_k2, 'gridk2');
+                                $result_k2 = hitungFuzzy($result_fungsi_permintaan_k2, $result_fungsi_stok_k2, $result_fungsi_produksi_k2, $result_rule_k2, 'gridk2', $derajat_keanggotaan_permintaan_k2, $derajat_keanggotaan_stok_k2);
                                 $rules_with_values_k2 = $result_k2['rules'];
                                 $produksi_k2 = $result_k2['produksi'];
 
                                 // Perhitungan Fuzzy Tsukamoto
-                                $result_tsukamoto = hitungFuzzy($result_fungsi_permintaan_tsukamoto, $result_fungsi_stok_tsukamoto, $result_fungsi_produksi_tsukamoto, $result_rule_tsukamoto, 'tsukamoto');
+                                $result_tsukamoto = hitungFuzzy($result_fungsi_permintaan_tsukamoto, $result_fungsi_stok_tsukamoto, $result_fungsi_produksi_tsukamoto, $result_rule_tsukamoto, 'tsukamoto', $derajat_keanggotaan_permintaan_tsukamoto, $derajat_keanggotaan_stok_tsukamoto);
                                 $rules_with_values_tsukamoto = $result_tsukamoto['rules'];
                                 $produksi_tsukamoto = $result_tsukamoto['produksi'];
+
+                                // UPDATE SEMUA TABEL RULE
+                                $table_names = ['rule_tsukamoto', 'rule_gridk2', 'rule_gridk3'];
+                                $namaTabel = ['tsukamoto', 'gridk2', 'gridk3'];
+
+                                foreach ($table_names as $index => $table_name) {
+                                    // Ambil elemen yang sesuai dari $namaTabel
+                                    $nT = $namaTabel[$index];
+
+                                    // Ambil data fungsi dan rule
+                                    $result_fungsi_permintaan = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_$nT WHERE jenis='Permintaan' ORDER BY batas_atas ASC;");
+                                    $result_fungsi_stok = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_$nT WHERE jenis='Stok' ORDER BY batas_atas ASC;");
+                                    $result_fungsi_produksi = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_$nT WHERE jenis='Produksi' ORDER BY batas_atas ASC;");
+                                    $result_rule = mysqli_query($conn, "SELECT * FROM $table_name;");
+
+                                    // Perhitungan dan update data
+                                    $result = hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $nT, $derajat_keanggotaan_permintaan, $derajat_keanggotaan_stok);
+                                    $rules_with_values = $result['rules'];
+                                    $produksi = $result['produksi'];
+
+                                    foreach ($rules_with_values as $rule) {
+                                        $update_query = "UPDATE $table_name SET alpha_predikat='{$rule['alpha_predikat']}', z1='{$rule['z1']}', z2='{$rule['z2']}', z='{$rule['z']}' WHERE id='{$rule['id']}'";
+                                        if (mysqli_query($conn, $update_query)) {
+                                            echo "Update berhasil untuk rule ID: {$rule['id']} di tabel $table_name<br>";
+                                        } else {
+                                            echo "Error saat mengupdate rule ID: {$rule['id']} di tabel $table_name - " . mysqli_error($conn) . "<br>";
+                                        }
+                                    }
+
+                                    // Update rule yang tidak terpilih (nilai 0)
+                                    $rule_ids = array_column($rules_with_values, 'id');
+                                    $rule_ids_str = "'" . implode("','", $rule_ids) . "'";
+
+                                    // Cari rule yang tidak ada di dalam hasil terpilih dan update ke 0
+                                    $update_zeros_query = "UPDATE $table_name SET alpha_predikat='0', z1='0', z2='0', z='0' WHERE id NOT IN ($rule_ids_str)";
+                                    if (mysqli_query($conn, $update_zeros_query)) {
+                                        echo "Update berhasil untuk rule yang tidak terpilih di tabel $table_name<br>";
+                                    } else {
+                                        echo "Error saat mengupdate rule yang tidak terpilih di tabel $table_name - " . mysqli_error($conn) . "<br>";
+                                    }
+                                }
                                 ?>
 
                                 <!-- Menampilkan hasil perhitungan -->
@@ -329,50 +366,214 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                     <h3>Hasil Perhitungan</h3>
                                     <p><strong>Permintaan:</strong> <?php echo $_POST['permintaan']; ?></p>
                                     <p><strong>Stok:</strong> <?php echo $_POST['stok']; ?></p>
-                                    <p><strong>Produksi (Hasil Defuzzifikasi):</strong> <?php echo number_format($produksi_k3, 2, ',', '.'); ?></p>
 
-                                    <!-- Tabel Nilai Fungsi Implikasi -->
-                                    <h4>Tabel Nilai Fungsi Implikasi</h4>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered table-striped table-hover">
-                                            <thead>
-                                                <tr class="bg-blue-grey">
-                                                    <th class="text-center valign-middle">Rule</th>
-                                                    <th class="text-center valign-middle">Permintaan</th>
-                                                    <th class="text-center valign-middle">Derajat Keanggotaan Permintaan</th>
-                                                    <th class="text-center valign-middle">Stok</th>
-                                                    <th class="text-center valign-middle">Derajat Keanggotaan Stok</th>
-                                                    <th class="text-center valign-middle">Produksi</th>
-                                                    <th class="text-center valign-middle">Tipe Kurva</th>
-                                                    <th class="text-center valign-middle">Alpha Predikat</th>
-                                                    <th class="text-center valign-middle">Nilai Z1</th>
-                                                    <th class="text-center valign-middle">Nilai Z2</th>
-                                                    <th class="text-center valign-middle">Nilai Z</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php foreach ($rules_with_values_k3 as $rule): ?>
-                                                    <tr>
-                                                        <td class="text-center"><?php echo $rule['id']; ?></td>
-                                                        <td class="text-center"><?php echo $rule['permintaan']; ?></td>
-                                                        <td class="text-center"><?php echo number_format($derajat_keanggotaan_permintaan[$rule['permintaan']], 4); ?></td>
-                                                        <td class="text-center"><?php echo $rule['stok']; ?></td>
-                                                        <td class="text-center"><?php echo number_format($derajat_keanggotaan_stok[$rule['stok']], 4); ?></td>
-                                                        <td class="text-center"><?php echo $rule['produksi']; ?></td>
-                                                        <td class="text-center"><?php echo ucfirst($rule['tipe']); ?></td> <!-- Menampilkan tipe kurva -->
-                                                        <td class="text-center"><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
-                                                        <td class="text-center"><?php echo isset($rule['z1']) ? number_format($rule['z1'], 2) : '-'; ?></td> <!-- Nilai Z1 untuk segitiga -->
-                                                        <td class="text-center"><?php echo isset($rule['z2']) ? number_format($rule['z2'], 2) : '-'; ?></td> <!-- Nilai Z2 untuk segitiga -->
-                                                        <td class="text-center"><?php echo number_format($rule['z'], 2); ?></td>
+                                    <div class="resultSectionTsukamoto">
+                                        <!-- Tabel untuk Fuzzy Tsukamoto -->
+                                        <h4>Hasil Fuzzy Tsukamoto</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped table-hover">
+                                                <thead>
+                                                    <tr class="bg-blue-grey">
+                                                        <th class="text-center valign-middle">Rule</th>
+                                                        <th class="text-center valign-middle">Permintaan</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Permintaan</th>
+                                                        <th class="text-center valign-middle">Stok</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Stok</th>
+                                                        <th class="text-center valign-middle">Produksi</th>
+                                                        <th class="text-center valign-middle">Tipe Kurva</th>
+                                                        <th class="text-center valign-middle">Alpha Predikat</th>
+                                                        <th class="text-center valign-middle">Nilai Z1</th>
+                                                        <th class="text-center valign-middle">Nilai Z2</th>
+                                                        <th class="text-center valign-middle">Nilai Z</th>
                                                     </tr>
-                                                <?php endforeach; ?>
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($rules_with_values_tsukamoto as $rule): ?>
+                                                        <tr>
+                                                            <td class="text-center"><?php echo $rule['id']; ?></td>
+                                                            <td class="text-center"><?php echo $rule['permintaan']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_permintaan_tsukamoto[$rule['permintaan']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['stok']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_stok_tsukamoto[$rule['stok']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['produksi']; ?></td>
+                                                            <td class="text-center"><?php echo ucfirst($rule['tipe']); ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z1']) ? number_format($rule['z1'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z2']) ? number_format($rule['z2'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['z'], 2); ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <?php
+                                        // Set variabel stok maksimum (misalnya 590, ini bisa diambil dari tabel pengaturan)
+                                        $stok_maksimum = 590;
+
+                                        // Hitung sisa stok
+                                        $sisa_stok_tsukamoto = ($produksi_tsukamoto + $_POST['stok']) - $_POST['permintaan'];
+
+                                        // Tentukan apakah produksi optimal atau tidak
+                                        if ($sisa_stok_tsukamoto > $stok_maksimum) {
+                                            $optimal_status = "Jumlah stok melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_tsukamoto, 2, ',', '.') . " paket/hari) tidaklah optimal.";
+                                            $optimal_class = "alert-danger"; // Warna merah untuk tidak optimal
+                                        } else {
+                                            $optimal_status = "Jumlah stok tidak melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_tsukamoto, 0, ',', '.') . " paket/hari) adalah optimal.";
+                                            $optimal_class = "alert-success"; // Warna hijau untuk optimal
+                                        }
+                                        ?>
+                                        <!-- Hasil Defuzzifikasi dan Perhitungan Sisa Stok -->
+                                        <div class="defuzzifikasi-result text-center">
+                                            <div class="alert bg-indigo" role="alert" style="font-size: 1.3em; font-weight: bold; margin-bottom: 0px;">
+                                                <p>Produksi yang dihasilkan: <?php echo number_format($produksi_tsukamoto, 2, ',', '.'); ?> paket/hari</p>
+                                                <p>Sisa stok: <?php echo number_format($sisa_stok_tsukamoto, 0, ',', '.'); ?></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Optimalitas -->
+                                        <div class="alert <?php echo $optimal_class; ?> text-center" role="alert" style="font-size: 1em; font-weight: bold;">
+                                            <p><?php echo $optimal_status; ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="resultSectionGridK2">
+                                        <!-- Tabel untuk Fuzzy Grid Partition K2 -->
+                                        <h4>Hasil Fuzzy Grid Partition K2</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped table-hover">
+                                                <thead>
+                                                    <tr class="bg-blue-grey">
+                                                        <th class="text-center valign-middle">Rule</th>
+                                                        <th class="text-center valign-middle">Permintaan</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Permintaan</th>
+                                                        <th class="text-center valign-middle">Stok</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Stok</th>
+                                                        <th class="text-center valign-middle">Produksi</th>
+                                                        <th class="text-center valign-middle">Tipe Kurva</th>
+                                                        <th class="text-center valign-middle">Alpha Predikat</th>
+                                                        <th class="text-center valign-middle">Nilai Z1</th>
+                                                        <th class="text-center valign-middle">Nilai Z2</th>
+                                                        <th class="text-center valign-middle">Nilai Z</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($rules_with_values_k2 as $rule): ?>
+                                                        <tr>
+                                                            <td class="text-center"><?php echo $rule['id']; ?></td>
+                                                            <td class="text-center"><?php echo $rule['permintaan']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_permintaan_k2[$rule['permintaan']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['stok']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_stok_k2[$rule['stok']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['produksi']; ?></td>
+                                                            <td class="text-center"><?php echo ucfirst($rule['tipe']); ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z1']) ? number_format($rule['z1'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z2']) ? number_format($rule['z2'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['z'], 2); ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <?php
+                                        // Hitung sisa stok
+                                        $sisa_stok_k2 = ($produksi_k2 + $_POST['stok']) - $_POST['permintaan'];
+
+                                        // Tentukan apakah produksi optimal atau tidak
+                                        if ($sisa_stok_k2 > $stok_maksimum) {
+                                            $optimal_status = "Jumlah stok melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_k2, 2, ',', '.') . " paket/hari) tidaklah optimal.";
+                                            $optimal_class = "alert-danger"; // Warna merah untuk tidak optimal
+                                        } else {
+                                            $optimal_status = "Jumlah stok tidak melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_k2, 0, ',', '.') . " paket/hari) adalah optimal.";
+                                            $optimal_class = "alert-success"; // Warna hijau untuk optimal
+                                        }
+                                        ?>
+                                        <!-- Hasil Defuzzifikasi dan Perhitungan Sisa Stok -->
+                                        <div class="defuzzifikasi-result text-center">
+                                            <div class="alert bg-indigo" role="alert" style="font-size: 1.3em; font-weight: bold; margin-bottom: 0px;">
+                                                <p>Produksi yang dihasilkan: <?php echo number_format($produksi_k2, 2, ',', '.'); ?> paket/hari</p>
+                                                <p>Sisa stok: <?php echo number_format($sisa_stok_k2, 0, ',', '.'); ?></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Optimalitas -->
+                                        <div class="alert <?php echo $optimal_class; ?> text-center" role="alert" style="font-size: 1em; font-weight: bold;">
+                                            <p><?php echo $optimal_status; ?></p>
+                                        </div>
+                                    </div>
+                                    <div class="resultSectionGridK3">
+                                        <!-- Tabel untuk Fuzzy Grid Partition K3 -->
+                                        <h4>Hasil Fuzzy Grid Partition K3</h4>
+                                        <div class="table-responsive">
+                                            <table class="table table-bordered table-striped table-hover">
+                                                <thead>
+                                                    <tr class="bg-blue-grey">
+                                                        <th class="text-center valign-middle">Rule</th>
+                                                        <th class="text-center valign-middle">Permintaan</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Permintaan</th>
+                                                        <th class="text-center valign-middle">Stok</th>
+                                                        <th class="text-center valign-middle">Derajat Keanggotaan Stok</th>
+                                                        <th class="text-center valign-middle">Produksi</th>
+                                                        <th class="text-center valign-middle">Tipe Kurva</th>
+                                                        <th class="text-center valign-middle">Alpha Predikat</th>
+                                                        <th class="text-center valign-middle">Nilai Z1</th>
+                                                        <th class="text-center valign-middle">Nilai Z2</th>
+                                                        <th class="text-center valign-middle">Nilai Z</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <?php foreach ($rules_with_values_k3 as $rule): ?>
+                                                        <tr>
+                                                            <td class="text-center"><?php echo $rule['id']; ?></td>
+                                                            <td class="text-center"><?php echo $rule['permintaan']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_permintaan_k3[$rule['permintaan']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['stok']; ?></td>
+                                                            <td class="text-center"><?php echo number_format($derajat_keanggotaan_stok_k3[$rule['stok']], 3); ?></td>
+                                                            <td class="text-center"><?php echo $rule['produksi']; ?></td>
+                                                            <td class="text-center"><?php echo ucfirst($rule['tipe']); ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['alpha_predikat'], 4); ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z1']) ? number_format($rule['z1'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo isset($rule['z2']) ? number_format($rule['z2'], 2) : '-'; ?></td>
+                                                            <td class="text-center"><?php echo number_format($rule['z'], 2); ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <?php
+                                        // Hitung sisa stok
+                                        $sisa_stok_k3 = ($produksi_k3 + $_POST['stok']) - $_POST['permintaan'];
+
+                                        // Tentukan apakah produksi optimal atau tidak
+                                        if ($sisa_stok_k3 > $stok_maksimum) {
+                                            $optimal_status = "Jumlah stok melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_k3, 2, ',', '.') . " paket/hari) tidaklah optimal.";
+                                            $optimal_class = "alert-danger"; // Warna merah untuk tidak optimal
+                                        } else {
+                                            $optimal_status = "Jumlah stok tidak melebihi batas atas dari jumlah stok yang ditentukan sehingga produksi (" . number_format($produksi_k3, 0, ',', '.') . " paket/hari) adalah optimal.";
+                                            $optimal_class = "alert-success"; // Warna hijau untuk optimal
+                                        }
+                                        ?>
+                                        <!-- Hasil Defuzzifikasi dan Perhitungan Sisa Stok -->
+                                        <div class="defuzzifikasi-result text-center">
+                                            <div class="alert bg-indigo" role="alert" style="font-size: 1.3em; font-weight: bold; margin-bottom: 0px;">
+                                                <p>Produksi yang dihasilkan: <?php echo number_format($produksi_k3, 2, ',', '.'); ?> paket/hari</p>
+                                                <p>Sisa stok: <?php echo number_format($sisa_stok_k3, 0, ',', '.'); ?></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Optimalitas -->
+                                        <div class="alert <?php echo $optimal_class; ?> text-center" role="alert" style="font-size: 1em; font-weight: bold;">
+                                            <p><?php echo $optimal_status; ?></p>
+                                        </div>
                                     </div>
 
                                     <!-- Bar Chart -->
-                                    <h4>Diagram Batang</h4>
-                                    <canvas id="barChart"></canvas>
+                                    <div id="barChartDiv">
+                                        <h4>Diagram Batang</h4>
+                                        <canvas id="barChart"></canvas>
+                                    </div>
                                 </div>
 
                                 <!-- Print Button -->
@@ -437,19 +638,19 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
             data: {
                 labels: ['Permintaan', 'Stok', 'Produksi'],
                 datasets: [{
-                        label: 'Fuzzy Grid Partition K3',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_k3; ?>],
-                        backgroundColor: '#3498db'
+                        label: 'Fuzzy Tsukamoto',
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_tsukamoto; ?>, <?php echo $produksi_tsukamoto; ?>],
+                        backgroundColor: '#e74c3c'
                     },
                     {
                         label: 'Fuzzy Grid Partition K2',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_k2; ?>],
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_k2; ?>, <?php echo $produksi_k2; ?>],
                         backgroundColor: '#2ecc71'
                     },
                     {
-                        label: 'Fuzzy Tsukamoto',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $_POST['stok']; ?>, <?php echo $produksi_tsukamoto; ?>],
-                        backgroundColor: '#e74c3c'
+                        label: 'Fuzzy Grid Partition K3',
+                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_k3; ?>, <?php echo $produksi_k3; ?>],
+                        backgroundColor: '#3498db'
                     }
                 ]
             },
