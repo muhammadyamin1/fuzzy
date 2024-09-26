@@ -23,6 +23,13 @@
 
     <!-- Custom Css -->
     <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        .login-page .judul {
+            padding: 10px;
+            border-radius: 12px;
+        }
+    </style>
 </head>
 
 <body class="login-page">
@@ -42,9 +49,8 @@
     }
     ?>
     <div class="login-box">
-        <div class="logo">
-            <a href="javascript:void(0);">Fuzzy Tsukamoto<br><b>Fuzzy Grid Partition</b></a>
-            <small>Membandingkan optimasi terbaik untuk hasil yang lebih baik</small>
+        <div class="logo judul bg-pink">
+            <a href="javascript:void(0);">Sistem Optimalisasi Produksi<br>Berdasarkan Permintaan dan Stok<br><b>Menuju Ekonomi Digital dengan<br>Pendekatan Fuzzy Grid Partition</b></a>
         </div>
         <div class="card">
             <div class="body">

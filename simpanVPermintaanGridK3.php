@@ -1,5 +1,6 @@
 <?php
 include 'auth.php';
+checkRole(['admin']);
 // sambungkan ke database
 include 'dbKoneksi.php';
 

@@ -1,26 +1,29 @@
 <?php
 include 'auth.php';
 checkRole(['admin']);
+date_default_timezone_set('Asia/Jakarta');
 include 'dbKoneksi.php';
 
-// Mendapatkan data dari database (jika ada)
-$sql = "SELECT * FROM pengaturan_variabel";
-$result = mysqli_query($conn, $sql);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+    $role = $_POST['role'];
 
-// Membuat array untuk menampung data dari database
-$variabel_data = [];
-if ($result && mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $variabel_data[$row['nama_variabel']] = $row['nilai_variabel'];
+    $stmt = $conn->prepare("INSERT INTO users (nama, username, password, role) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $name, $username, $password, $role);
+
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "User berhasil ditambahkan.";
+    } else {
+        $_SESSION['error'] = "Gagal menambahkan user.";
     }
+
+    $stmt->close();
+
+    header('Location: users.php');
+    exit();
 }
-
-// Nilai default jika data belum ada
-$stok_maksimum = isset($variabel_data['stok_maksimum']) ? $variabel_data['stok_maksimum'] : '';
-$permintaan = isset($variabel_data['permintaan']) ? $variabel_data['permintaan'] : '';
-$stok = isset($variabel_data['stok']) ? $variabel_data['stok'] : '';
-
-mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -121,37 +124,43 @@ mysqli_close($conn);
     <section class="content">
         <div class="container-fluid">
             <div class="block-header">
-                <h2>PENGATURAN VARIABEL</h2>
+                <h2>KELOLA USERS</h2>
             </div>
             <div class="row clearfix">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Pengaturan Variabel
+                                Tambah User
                             </h2>
                         </div>
                         <div class="body">
-                            <form action="editPengaturan.php" method="POST">
-                                <label for="stok_maksimum">Stok Maksimum:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="stok_maksimum" name="stok_maksimum" value="<?php echo $stok_maksimum; ?>" required>
+                            <div class="row">
+                                <form id="userForm" action="tambahUser.php" method="POST">
+                                    <div class="col-6 col-md-6">
+                                        <label for="name">Nama</label>
+                                        <input type="text" name="name" id="name" class="form-control" autocomplete="off" required style="margin-bottom: 15px;">
+
+                                        <label for="username">Username</label>
+                                        <input type="text" name="username" id="username" class="form-control" autocomplete="off" required style="margin-bottom: 15px;">
+                                        <span id="usernameError" style="color: red; display: none; margin-bottom: 15px;">Username sudah digunakan.</span>
+
+                                        <label for="password">Password</label>
+                                        <input type="password" id="password" name="password" class="form-control" autocomplete="new-password" style="margin-bottom: 15px;">
+
+                                        <div style="margin-top: 10px; margin-bottom: 15px;">
+                                            <input type="checkbox" id="tampilPass" class="filled-in" onclick="togglePassword()">
+                                            <label for="tampilPass">Tampilkan Password</label>
+                                        </div>
+                                        <label for="role">Role</label>
+                                        <select name="role" id="role" class="form-control">
+                                            <option value="user">User</option>
+                                            <option value="admin">Admin</option>
+                                        </select>
                                     </div>
-                                </div>
-                                <label for="permintaan">Permintaan:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="permintaan" name="permintaan" value="<?php echo $permintaan; ?>" required>
-                                    </div>
-                                </div>
-                                <label for="stok">Stok:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="stok" name="stok" value="<?php echo $stok; ?>" required>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </div>
+                            <a href="users.php" class="btn bg-blue-grey">Kembali</a>
+                            <button type="submit" class="btn btn-primary">Simpan</button>
                             </form>
                         </div>
                     </div>
@@ -165,9 +174,6 @@ mysqli_close($conn);
 
     <!-- Bootstrap Core Js -->
     <script src="plugins/bootstrap/js/bootstrap.js"></script>
-
-    <!-- Select Plugin Js -->
-    <script src="plugins/bootstrap-select/js/bootstrap-select.js"></script>
 
     <!-- Slimscroll Plugin Js -->
     <script src="plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
@@ -201,6 +207,53 @@ mysqli_close($conn);
 
     <!-- Demo Js -->
     <script src="js/demo.js"></script>
+
+    <script>
+        function togglePassword() {
+            var passwordField = document.getElementById("password");
+            passwordField.type = (passwordField.type === "password") ? "text" : "password";
+        }
+
+        $(document).ready(function() {
+            var usernameValid = false;
+
+            $('#username').on('input', function() {
+                var username = $(this).val();
+                var $usernameField = $(this);
+                var $usernameError = $('#usernameError');
+
+                // Memeriksa apakah username sudah digunakan dengan AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: 'cekUsername.php',
+                    data: {
+                        username: username
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.exists) {
+                            // Jika username sudah ada, tambahkan warna merah pada border input
+                            $usernameField.css('border-color', 'red');
+                            $usernameError.css('display', 'block').show(); // Tampilkan pesan error
+                            usernameValid = false;
+                        } else {
+                            // Jika username tidak ada, kembalikan warna border ke default dan sembunyikan pesan error
+                            $usernameField.css('border-color', '');
+                            $usernameError.hide(); // Sembunyikan pesan error
+                            usernameValid = true;
+                        }
+                    }
+                });
+            });
+
+            $('#userForm').on('submit', function(e) {
+                if (!usernameValid) {
+                    e.preventDefault(); // Mencegah pengiriman form jika username tidak valid
+                    alert('Username sudah ada, silakan pilih yang lain.');
+                }
+            });
+        });
+    </script>
 
 </body>
 

@@ -1,5 +1,6 @@
 <?php
 include 'auth.php';
+checkRole(['admin']);
 include 'dbKoneksi.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {

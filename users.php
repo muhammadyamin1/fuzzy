@@ -3,24 +3,9 @@ include 'auth.php';
 checkRole(['admin']);
 include 'dbKoneksi.php';
 
-// Mendapatkan data dari database (jika ada)
-$sql = "SELECT * FROM pengaturan_variabel";
-$result = mysqli_query($conn, $sql);
-
-// Membuat array untuk menampung data dari database
-$variabel_data = [];
-if ($result && mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $variabel_data[$row['nama_variabel']] = $row['nilai_variabel'];
-    }
-}
-
-// Nilai default jika data belum ada
-$stok_maksimum = isset($variabel_data['stok_maksimum']) ? $variabel_data['stok_maksimum'] : '';
-$permintaan = isset($variabel_data['permintaan']) ? $variabel_data['permintaan'] : '';
-$stok = isset($variabel_data['stok']) ? $variabel_data['stok'] : '';
-
-mysqli_close($conn);
+// Ambil data pengguna dari database
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html>
@@ -121,38 +106,74 @@ mysqli_close($conn);
     <section class="content">
         <div class="container-fluid">
             <div class="block-header">
-                <h2>PENGATURAN VARIABEL</h2>
+                <h2>KELOLA USERS</h2>
             </div>
             <div class="row clearfix">
+                <div class="col-lg-12">
+                    <?php if (isset($_SESSION['error'])) : ?>
+                        <div class="alert alert-danger" role="alert">
+                            <?php
+                            echo $_SESSION['error'];
+                            unset($_SESSION['error']);
+                            ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (isset($_SESSION['success'])) : ?>
+                        <div class="alert alert-success" role="alert">
+                            <?php
+                            echo $_SESSION['success'];
+                            unset($_SESSION['success']);
+                            ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     <div class="card">
                         <div class="header">
                             <h2>
-                                Pengaturan Variabel
+                                Daftar Users
                             </h2>
                         </div>
                         <div class="body">
-                            <form action="editPengaturan.php" method="POST">
-                                <label for="stok_maksimum">Stok Maksimum:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="stok_maksimum" name="stok_maksimum" value="<?php echo $stok_maksimum; ?>" required>
-                                    </div>
-                                </div>
-                                <label for="permintaan">Permintaan:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="permintaan" name="permintaan" value="<?php echo $permintaan; ?>" required>
-                                    </div>
-                                </div>
-                                <label for="stok">Stok:</label>
-                                <div class="form-group">
-                                    <div class="form-line">
-                                        <input type="number" class="form-control" id="stok" name="stok" value="<?php echo $stok; ?>" required>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                            </form>
+                            <a href="tambahUser.php" class="btn btn-primary mb-3">Tambah User</a>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">No.</th>
+                                            <th>Nama</th>
+                                            <th>Username</th>
+                                            <th class="text-center">Role</th>
+                                            <th class="text-center">Tanggal Dibuat</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ($result->num_rows > 0): ?>
+                                            <?php $no = 1; ?>
+                                            <?php while ($row = $result->fetch_assoc()): ?>
+                                                <tr>
+                                                    <td class="text-center"><?= $no++ ?></td>
+                                                    <td><?= $row['nama'] ?></td>
+                                                    <td><?= $row['username'] ?></td>
+                                                    <td class="text-center"><?= $row['role'] ?></td>
+                                                    <td class="text-center"><?= $row['created_at'] ?></td>
+                                                    <td class="text-center">
+                                                        <a href="editUser.php?id=<?= $row['id'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                                                        <a href="deleteUser.php?id=<?= $row['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('Yakin ingin menghapus pengguna ini?')">Hapus</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endwhile; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan='6' class='text-center'>Tidak ada data</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                     </div>
                 </div>

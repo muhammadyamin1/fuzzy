@@ -1,3 +1,6 @@
+<?php
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'user'; // Mengambil role user dari sesi, defaultnya user
+?>
 <div class="menu">
     <ul class="list">
         <li class="header">MENU UTAMA</li>
@@ -7,6 +10,7 @@
                 <span>Dashboard</span>
             </a>
         </li>
+        <?php if($role == 'admin') : ?>
         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'variabel.php' ? 'active' : ''; ?>">
             <a href="variabel.php">
                 <i class="material-icons">build</i>
@@ -102,17 +106,20 @@
                 </li>
             </ul>
         </li>
+        <?php endif; ?>
         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'analisisMetode.php' ? 'active' : ''; ?>">
             <a href="analisisMetode.php">
                 <i class="material-icons">sync</i>
                 <span>Analisis Seluruh Metode</span>
             </a>
         </li>
+        <?php if($role == 'admin') : ?>
         <li class="<?php echo basename($_SERVER['PHP_SELF']) == 'users.php' ? 'active' : ''; ?>">
             <a href="users.php">
                 <i class="material-icons">people</i>
                 <span>Kelola Users</span>
             </a>
         </li>
+        <?php endif; ?>
     </ul>
 </div>

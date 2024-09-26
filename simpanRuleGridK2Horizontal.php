@@ -1,5 +1,6 @@
 <?php
 include 'auth.php';
+checkRole(['admin']);
 include 'dbKoneksi.php';
 
 /// Menyimpan semua rule ke dalam tabel
