@@ -38,7 +38,7 @@ function hitungKeanggotaan($x, $a, $b, $c, $tipe)
 }
 
 // Fungsi untuk perhitungan dari setiap metode
-function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $table_name, &$derajat_keanggotaan_permintaan, &$derajat_keanggotaan_stok)
+function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $table_name, &$derajat_keanggotaan_permintaan, &$derajat_keanggotaan_stok, $permintaan, $stok)
 {
     global $conn;
     $sum_alpha_z = 0;
@@ -57,14 +57,14 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
     // Hitung derajat keanggotaan permintaan dan stok
     mysqli_data_seek($result_fungsi_permintaan, 0);
     while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_permintaan)) {
-        $nilai_keanggotaan_permintaan = hitungKeanggotaan($_POST['permintaan'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
+        $nilai_keanggotaan_permintaan = hitungKeanggotaan($permintaan, $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
         $nilai_keanggotaan_permintaan = round($nilai_keanggotaan_permintaan, 3); // Membatasi menjadi tiga angka di belakang koma
         $derajat_keanggotaan_permintaan[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_permintaan;
     }
 
     mysqli_data_seek($result_fungsi_stok, 0);
     while ($row_fungsi = mysqli_fetch_assoc($result_fungsi_stok)) {
-        $nilai_keanggotaan_stok = hitungKeanggotaan($_POST['stok'], $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
+        $nilai_keanggotaan_stok = hitungKeanggotaan($stok, $row_fungsi['batas_bawah'], $row_fungsi['batas_tengah'], $row_fungsi['batas_atas'], $row_fungsi['tipe']);
         $nilai_keanggotaan_stok = round($nilai_keanggotaan_stok, 3);
         $derajat_keanggotaan_stok[$row_fungsi['nama_fungsi']] = $nilai_keanggotaan_stok;
     }
@@ -203,7 +203,23 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
     </style>
 </head>
 
-<body class="theme-red">
+<body class="theme-red"><!-- Page Loader -->
+    <div class="page-loader-wrapper">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
     <!-- Overlay For Sidebars -->
     <div class="overlay"></div>
     <!-- #END# Overlay For Sidebars -->
@@ -267,7 +283,7 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                     <label for="permintaan" class="col-sm-2 control-label">Permintaan</label>
                                     <div class="col-sm-10">
                                         <div class="form-line">
-                                            <input type="number" class="form-control" id="permintaan" name="permintaan" placeholder="Masukkan Permintaan" required>
+                                            <input type="number" class="form-control" id="permintaan" name="permintaan" placeholder="Masukkan Permintaan (Opsional)">
                                         </div>
                                     </div>
                                 </div>
@@ -275,19 +291,49 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                     <label for="stok" class="col-sm-2 control-label">Stok</label>
                                     <div class="col-sm-10">
                                         <div class="form-line">
-                                            <input type="number" class="form-control" id="stok" name="stok" placeholder="Masukkan Stok" required>
+                                            <input type="number" class="form-control" id="stok" name="stok" placeholder="Masukkan Stok (Opsional)">
                                         </div>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div class="col-sm-offset-2 col-sm-10">
-                                        <button type="submit" id="submitButton" class="btn btn-primary">Hitung</button>
+                                        <button type="submit" id="submitButton" name="btn_submit" class="btn btn-primary">Hitung</button>
                                     </div>
                                 </div>
                             </form>
 
                             <?php if ($_SERVER['REQUEST_METHOD'] == 'POST'): ?>
                                 <?php
+
+                                // Query untuk mendapatkan nilai stok maksimum, permintaan, dan stok dari tabel pengaturan_variabel
+                                $kueri = "SELECT nama_variabel, nilai_variabel FROM pengaturan_variabel WHERE nama_variabel IN ('stok_maksimum', 'permintaan', 'stok')";
+                                $q1 = mysqli_query($conn, $kueri);
+
+                                // Inisialisasi variabel dengan nilai default dari database
+                                $stok_maksimum = 590; // Nilai default jika tidak ada data di database
+                                $permintaan = 3900; // Nilai default jika tidak ada data di database
+                                $stok = 310; // Nilai default jika tidak ada data di database
+
+                                if ($q1 && mysqli_num_rows($q1) > 0) {
+                                    while ($row = mysqli_fetch_assoc($q1)) {
+                                        // Memasukkan nilai dari database berdasarkan nama_variabel
+                                        if ($row['nama_variabel'] == 'stok_maksimum') {
+                                            $stok_maksimum = $row['nilai_variabel'];
+                                        } elseif ($row['nama_variabel'] == 'permintaan') {
+                                            $permintaan = $row['nilai_variabel'];
+                                        } elseif ($row['nama_variabel'] == 'stok') {
+                                            $stok = $row['nilai_variabel'];
+                                        }
+                                    }
+                                }
+
+                                // Cek apakah form disubmit
+                                if (isset($_POST['btn_submit'])) {
+                                    // Ambil nilai dari form jika ada input, atau gunakan nilai default
+                                    $permintaan = !empty($_POST['permintaan']) ? floatval($_POST['permintaan']) : $permintaan;
+                                    $stok = !empty($_POST['stok']) ? floatval($_POST['stok']) : $stok;
+                                }
+
                                 // Ambil data dari tabel fungsi keanggotaan untuk K3, K2, dan Tsukamoto
                                 $result_fungsi_permintaan_k3 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Permintaan' ORDER BY batas_atas ASC;");
                                 $result_fungsi_stok_k3 = mysqli_query($conn, "SELECT * FROM fungsi_keanggotaan_gridk3 WHERE jenis='Stok' ORDER BY batas_atas ASC;");
@@ -305,17 +351,17 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                 $result_rule_tsukamoto = mysqli_query($conn, "SELECT * FROM rule_tsukamoto;");
 
                                 // Perhitungan Fuzzy Grid Partition K3
-                                $result_k3 = hitungFuzzy($result_fungsi_permintaan_k3, $result_fungsi_stok_k3, $result_fungsi_produksi_k3, $result_rule_k3, 'gridk3', $derajat_keanggotaan_permintaan_k3, $derajat_keanggotaan_stok_k3);
+                                $result_k3 = hitungFuzzy($result_fungsi_permintaan_k3, $result_fungsi_stok_k3, $result_fungsi_produksi_k3, $result_rule_k3, 'gridk3', $derajat_keanggotaan_permintaan_k3, $derajat_keanggotaan_stok_k3, $permintaan, $stok);
                                 $rules_with_values_k3 = $result_k3['rules'];
                                 $produksi_k3 = $result_k3['produksi'];
 
                                 // Perhitungan Fuzzy Grid Partition K2
-                                $result_k2 = hitungFuzzy($result_fungsi_permintaan_k2, $result_fungsi_stok_k2, $result_fungsi_produksi_k2, $result_rule_k2, 'gridk2', $derajat_keanggotaan_permintaan_k2, $derajat_keanggotaan_stok_k2);
+                                $result_k2 = hitungFuzzy($result_fungsi_permintaan_k2, $result_fungsi_stok_k2, $result_fungsi_produksi_k2, $result_rule_k2, 'gridk2', $derajat_keanggotaan_permintaan_k2, $derajat_keanggotaan_stok_k2, $permintaan, $stok);
                                 $rules_with_values_k2 = $result_k2['rules'];
                                 $produksi_k2 = $result_k2['produksi'];
 
                                 // Perhitungan Fuzzy Tsukamoto
-                                $result_tsukamoto = hitungFuzzy($result_fungsi_permintaan_tsukamoto, $result_fungsi_stok_tsukamoto, $result_fungsi_produksi_tsukamoto, $result_rule_tsukamoto, 'tsukamoto', $derajat_keanggotaan_permintaan_tsukamoto, $derajat_keanggotaan_stok_tsukamoto);
+                                $result_tsukamoto = hitungFuzzy($result_fungsi_permintaan_tsukamoto, $result_fungsi_stok_tsukamoto, $result_fungsi_produksi_tsukamoto, $result_rule_tsukamoto, 'tsukamoto', $derajat_keanggotaan_permintaan_tsukamoto, $derajat_keanggotaan_stok_tsukamoto, $permintaan, $stok);
                                 $rules_with_values_tsukamoto = $result_tsukamoto['rules'];
                                 $produksi_tsukamoto = $result_tsukamoto['produksi'];
 
@@ -334,7 +380,7 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                     $result_rule = mysqli_query($conn, "SELECT * FROM $table_name;");
 
                                     // Perhitungan dan update data
-                                    $result = hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $nT, $derajat_keanggotaan_permintaan, $derajat_keanggotaan_stok);
+                                    $result = hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fungsi_produksi, $result_rule, $nT, $derajat_keanggotaan_permintaan, $derajat_keanggotaan_stok, $permintaan, $stok);
                                     $rules_with_values = $result['rules'];
                                     $produksi = $result['produksi'];
 
@@ -364,8 +410,8 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                 <!-- Menampilkan hasil perhitungan -->
                                 <div id="resultSection">
                                     <h3>Hasil Perhitungan</h3>
-                                    <p><strong>Permintaan:</strong> <?php echo $_POST['permintaan']; ?></p>
-                                    <p><strong>Stok:</strong> <?php echo $_POST['stok']; ?></p>
+                                    <p><strong>Permintaan:</strong> <?php echo $permintaan ?></p>
+                                    <p><strong>Stok:</strong> <?php echo $stok ?></p>
 
                                     <div class="resultSectionTsukamoto">
                                         <!-- Tabel untuk Fuzzy Tsukamoto -->
@@ -408,11 +454,8 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                                         </div>
 
                                         <?php
-                                        // Set variabel stok maksimum (misalnya 590, ini bisa diambil dari tabel pengaturan)
-                                        $stok_maksimum = 590;
-
                                         // Hitung sisa stok
-                                        $sisa_stok_tsukamoto = ($produksi_tsukamoto + $_POST['stok']) - $_POST['permintaan'];
+                                        $sisa_stok_tsukamoto = ($produksi_tsukamoto + $stok) - $permintaan;
 
                                         // Tentukan apakah produksi optimal atau tidak
                                         if ($sisa_stok_tsukamoto > $stok_maksimum) {
@@ -478,7 +521,7 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
 
                                         <?php
                                         // Hitung sisa stok
-                                        $sisa_stok_k2 = ($produksi_k2 + $_POST['stok']) - $_POST['permintaan'];
+                                        $sisa_stok_k2 = ($produksi_k2 + $stok) - $permintaan;
 
                                         // Tentukan apakah produksi optimal atau tidak
                                         if ($sisa_stok_k2 > $stok_maksimum) {
@@ -544,7 +587,7 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
 
                                         <?php
                                         // Hitung sisa stok
-                                        $sisa_stok_k3 = ($produksi_k3 + $_POST['stok']) - $_POST['permintaan'];
+                                        $sisa_stok_k3 = ($produksi_k3 + $stok) - $permintaan;
 
                                         // Tentukan apakah produksi optimal atau tidak
                                         if ($sisa_stok_k3 > $stok_maksimum) {
@@ -639,17 +682,17 @@ function hitungFuzzy($result_fungsi_permintaan, $result_fungsi_stok, $result_fun
                 labels: ['Permintaan', 'Stok', 'Produksi'],
                 datasets: [{
                         label: 'Fuzzy Tsukamoto',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_tsukamoto; ?>, <?php echo $produksi_tsukamoto; ?>],
+                        data: [<?php echo $permintaan; ?>, <?php echo $sisa_stok_tsukamoto; ?>, <?php echo $produksi_tsukamoto; ?>],
                         backgroundColor: '#e74c3c'
                     },
                     {
                         label: 'Fuzzy Grid Partition K2',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_k2; ?>, <?php echo $produksi_k2; ?>],
+                        data: [<?php echo $permintaan; ?>, <?php echo $sisa_stok_k2; ?>, <?php echo $produksi_k2; ?>],
                         backgroundColor: '#2ecc71'
                     },
                     {
                         label: 'Fuzzy Grid Partition K3',
-                        data: [<?php echo $_POST['permintaan']; ?>, <?php echo $sisa_stok_k3; ?>, <?php echo $produksi_k3; ?>],
+                        data: [<?php echo $permintaan; ?>, <?php echo $sisa_stok_k3; ?>, <?php echo $produksi_k3; ?>],
                         backgroundColor: '#3498db'
                     }
                 ]

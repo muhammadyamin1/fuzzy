@@ -1,27 +1,23 @@
-﻿<?php
+<?php
 include 'auth.php';
 include 'dbKoneksi.php';
 
-// Mengambil nilai dari pengaturan_variabel
-$sql = "SELECT * FROM pengaturan_variabel WHERE nama_variabel IN ('stok_maksimum', 'permintaan', 'stok')";
+// Mendapatkan data dari database (jika ada)
+$sql = "SELECT * FROM pengaturan_variabel";
 $result = mysqli_query($conn, $sql);
 
-// Inisialisasi nilai default
-$stok_maksimum = 0;
-$permintaan = 0;
-$stok = 0;
-
+// Membuat array untuk menampung data dari database
+$variabel_data = [];
 if ($result && mysqli_num_rows($result) > 0) {
     while ($row = mysqli_fetch_assoc($result)) {
-        if ($row['nama_variabel'] == 'stok_maksimum') {
-            $stok_maksimum = $row['nilai_variabel'];
-        } elseif ($row['nama_variabel'] == 'permintaan') {
-            $permintaan = $row['nilai_variabel'];
-        } elseif ($row['nama_variabel'] == 'stok') {
-            $stok = $row['nilai_variabel'];
-        }
+        $variabel_data[$row['nama_variabel']] = $row['nilai_variabel'];
     }
 }
+
+// Nilai default jika data belum ada
+$stok_maksimum = isset($variabel_data['stok_maksimum']) ? $variabel_data['stok_maksimum'] : '';
+$permintaan = isset($variabel_data['permintaan']) ? $variabel_data['permintaan'] : '';
+$stok = isset($variabel_data['stok']) ? $variabel_data['stok'] : '';
 
 mysqli_close($conn);
 ?>
@@ -123,54 +119,43 @@ mysqli_close($conn);
 
     <section class="content">
         <div class="container-fluid">
-            <?php
-            if (isset($_SESSION['success'])) {
-                echo '<div class="alert alert-success mt-4 mb-3">' . htmlspecialchars($_SESSION['success']) . '</div>';
-                unset($_SESSION['success']);
-            }
-            ?>
             <div class="block-header">
-                <h2>DASHBOARD</h2>
+                <h2>PENGATURAN VARIABEL</h2>
             </div>
-
-            <!-- Widgets -->
             <div class="row clearfix">
-                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                    <div class="info-box bg-pink hover-expand-effect">
-                        <div class="icon">
-                            <i class="material-icons">equalizer</i>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="card">
+                        <div class="header">
+                            <h2>
+                                Pengaturan Variabel
+                            </h2>
                         </div>
-                        <div class="content">
-                            <div class="text">PERMINTAAN</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $permintaan; ?>" data-speed="1000" data-fresh-interval="20"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                    <div class="info-box bg-cyan hover-expand-effect">
-                        <div class="icon">
-                            <i class="material-icons">storage</i>
-                        </div>
-                        <div class="content">
-                            <div class="text">STOK</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $stok; ?>" data-speed="1000" data-fresh-interval="20"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-                    <div class="info-box bg-light-green hover-expand-effect custom-cursor-default-hover">
-                        <div class="icon">
-                            <i class="material-icons">trending_up</i>
-                        </div>
-                        <div class="content">
-                            <div class="text">STOK MAKSIMUM</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $stok_maksimum; ?>" data-speed="1000" data-fresh-interval="20">1225</div>
+                        <div class="body">
+                            <form action="editPengaturan.php" method="POST">
+                                <label for="stok_maksimum">Stok Maksimum:</label>
+                                <div class="form-group">
+                                    <div class="form-line">
+                                        <input type="number" class="form-control" id="stok_maksimum" name="stok_maksimum" value="<?php echo $stok_maksimum; ?>" required>
+                                    </div>
+                                </div>
+                                <label for="permintaan">Permintaan:</label>
+                                <div class="form-group">
+                                    <div class="form-line">
+                                        <input type="number" class="form-control" id="permintaan" name="permintaan" value="<?php echo $permintaan; ?>" required>
+                                    </div>
+                                </div>
+                                <label for="stok">Stok:</label>
+                                <div class="form-group">
+                                    <div class="form-line">
+                                        <input type="number" class="form-control" id="stok" name="stok" value="<?php echo $stok; ?>" required>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Simpan</button>
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- #END# Widgets -->
-        </div>
         </div>
     </section>
 
@@ -215,6 +200,7 @@ mysqli_close($conn);
 
     <!-- Demo Js -->
     <script src="js/demo.js"></script>
+
 </body>
 
 </html>

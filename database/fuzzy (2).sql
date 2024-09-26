@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 25 Sep 2024 pada 06.38
+-- Waktu pembuatan: 26 Sep 2024 pada 05.10
 -- Versi server: 10.4.32-MariaDB
 -- Versi PHP: 8.2.12
 
@@ -135,6 +135,27 @@ INSERT INTO `fungsi_keanggotaan_tsukamoto` (`id`, `jenis`, `nama_fungsi`, `tipe`
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `pengaturan_variabel`
+--
+
+CREATE TABLE `pengaturan_variabel` (
+  `id` int(11) NOT NULL,
+  `nama_variabel` varchar(50) NOT NULL,
+  `nilai_variabel` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `pengaturan_variabel`
+--
+
+INSERT INTO `pengaturan_variabel` (`id`, `nama_variabel`, `nilai_variabel`) VALUES
+(4, 'stok_maksimum', 590),
+(5, 'permintaan', 3900),
+(6, 'stok', 310);
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `rule_gridk2`
 --
 
@@ -143,10 +164,10 @@ CREATE TABLE `rule_gridk2` (
   `permintaan` varchar(50) NOT NULL,
   `stok` varchar(50) NOT NULL,
   `produksi` varchar(50) NOT NULL,
-  `alpha_predikat` decimal(10,4) DEFAULT NULL,
-  `z1` decimal(10,4) DEFAULT NULL,
-  `z2` decimal(10,4) DEFAULT NULL,
-  `z` decimal(10,4) NOT NULL
+  `alpha_predikat` decimal(10,3) DEFAULT NULL,
+  `z1` decimal(10,3) DEFAULT NULL,
+  `z2` decimal(10,3) DEFAULT NULL,
+  `z` decimal(10,3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -154,22 +175,22 @@ CREATE TABLE `rule_gridk2` (
 --
 
 INSERT INTO `rule_gridk2` (`id`, `permintaan`, `stok`, `produksi`, `alpha_predikat`, `z1`, `z2`, `z`) VALUES
-('R1', 'SK', 'B', 'SK', NULL, NULL, NULL, 0.0000),
-('R10', 'M', 'SB', 'M', NULL, NULL, NULL, 0.0000),
-('R11', 'SM', 'B', 'SM', NULL, NULL, NULL, 0.0000),
-('R12', 'SM', 'SB', 'SM', NULL, NULL, NULL, 0.0000),
-('R13', 'M', 'SD', 'M', NULL, NULL, NULL, 0.0000),
-('R14', 'M', 'D', 'M', NULL, NULL, NULL, 0.0000),
-('R15', 'SM', 'SD', 'SM', NULL, NULL, NULL, 0.0000),
-('R16', 'SM', 'D', 'SM', NULL, NULL, NULL, 0.0000),
-('R2', 'SK', 'SB', 'SK', NULL, NULL, NULL, 0.0000),
-('R3', 'K', 'B', 'K', NULL, NULL, NULL, 0.0000),
-('R4', 'K', 'SB', 'K', NULL, NULL, NULL, 0.0000),
-('R5', 'SK', 'SD', 'SK', NULL, NULL, NULL, 0.0000),
-('R6', 'SK', 'D', 'SK', NULL, NULL, NULL, 0.0000),
-('R7', 'K', 'SD', 'K', NULL, NULL, NULL, 0.0000),
-('R8', 'K', 'D', 'K', NULL, NULL, NULL, 0.0000),
-('R9', 'M', 'B', 'M', NULL, NULL, NULL, 0.0000);
+('R1', 'SK', 'B', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R10', 'M', 'SB', 'M', 0.000, 0.000, 0.000, 0.000),
+('R11', 'SM', 'B', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R12', 'SM', 'SB', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R13', 'M', 'SD', 'M', 0.000, 0.000, 0.000, 0.000),
+('R14', 'M', 'D', 'M', 0.000, 0.000, 0.000, 0.000),
+('R15', 'SM', 'SD', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R16', 'SM', 'D', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R2', 'SK', 'SB', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R3', 'K', 'B', 'K', 0.000, 0.000, 0.000, 0.000),
+('R4', 'K', 'SB', 'K', 0.000, 0.000, 0.000, 0.000),
+('R5', 'SK', 'SD', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R6', 'SK', 'D', 'SK', 0.059, 0.000, 0.000, 3882.000),
+('R7', 'K', 'SD', 'K', 0.000, 0.000, 0.000, 0.000),
+('R8', 'K', 'D', 'K', 0.875, 3875.000, 4125.000, 8000.000),
+('R9', 'M', 'B', 'M', 0.000, 0.000, 0.000, 0.000);
 
 -- --------------------------------------------------------
 
@@ -182,10 +203,10 @@ CREATE TABLE `rule_gridk3` (
   `permintaan` varchar(50) NOT NULL,
   `stok` varchar(50) NOT NULL,
   `produksi` varchar(50) NOT NULL,
-  `alpha_predikat` decimal(10,4) DEFAULT NULL,
-  `z1` decimal(10,4) DEFAULT NULL,
-  `z2` decimal(10,4) DEFAULT NULL,
-  `z` decimal(10,4) NOT NULL
+  `alpha_predikat` decimal(10,3) DEFAULT NULL,
+  `z1` decimal(10,3) DEFAULT NULL,
+  `z2` decimal(10,3) DEFAULT NULL,
+  `z` decimal(10,3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -193,70 +214,70 @@ CREATE TABLE `rule_gridk3` (
 --
 
 INSERT INTO `rule_gridk3` (`id`, `permintaan`, `stok`, `produksi`, `alpha_predikat`, `z1`, `z2`, `z`) VALUES
-('R1', 'SKS', 'CB', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R10', 'CK', 'B', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R11', 'CK', 'SB', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R12', 'CK', 'SBS', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R13', 'K', 'CB', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R14', 'K', 'B', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R15', 'K', 'SB', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R16', 'K', 'SBS', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R17', 'SKS', 'SDS', 'SKS', 0.2381, 0.0000, 0.0000, 2872.3810),
-('R18', 'SKS', 'SD', 'SKS', 0.5192, 0.0000, 0.0000, 2550.4808),
-('R19', 'SKS', 'CD', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R2', 'SKS', 'B', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R20', 'SKS', 'D', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R21', 'SK', 'SDS', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R22', 'SK', 'SD', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R23', 'SK', 'CD', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R24', 'SK', 'D', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R25', 'CK', 'SDS', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R26', 'CK', 'SD', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R27', 'CK', 'CD', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R28', 'CK', 'D', 'CK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R29', 'K', 'SDS', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R3', 'SKS', 'SB', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R30', 'K', 'SD', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R31', 'K', 'CD', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R32', 'K', 'D', 'K', 0.0000, 0.0000, 0.0000, 0.0000),
-('R33', 'CM', 'CB', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R34', 'CM', 'B', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R35', 'CM', 'SB', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R36', 'CM', 'SBS', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R37', 'M', 'CB', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R38', 'M', 'B', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R39', 'M', 'SB', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R4', 'SKS', 'SBS', 'SKS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R40', 'M', 'SBS', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R41', 'SM', 'CB', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R42', 'SM', 'B', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R43', 'SM', 'SB', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R44', 'SM', 'SBS', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R45', 'SMS', 'CB', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R46', 'SMS', 'B', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R47', 'SMS', 'SB', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R48', 'SMS', 'SBS', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R49', 'CM', 'SDS', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R5', 'SK', 'CB', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R50', 'CM', 'SD', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R51', 'CM', 'CD', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R52', 'CM', 'D', 'CM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R53', 'M', 'SDS', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R54', 'M', 'SD', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R55', 'M', 'CD', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R56', 'M', 'D', 'M', 0.0000, 0.0000, 0.0000, 0.0000),
-('R57', 'SM', 'SDS', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R58', 'SM', 'SD', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R59', 'SM', 'CD', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R6', 'SK', 'B', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R60', 'SM', 'D', 'SM', 0.0000, 0.0000, 0.0000, 0.0000),
-('R61', 'SMS', 'SDS', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R62', 'SMS', 'SD', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R63', 'SMS', 'CD', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R64', 'SMS', 'D', 'SMS', 0.0000, 0.0000, 0.0000, 0.0000),
-('R7', 'SK', 'SB', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R8', 'SK', 'SBS', 'SK', 0.0000, 0.0000, 0.0000, 0.0000),
-('R9', 'CK', 'CB', 'CK', 0.0000, 0.0000, 0.0000, 0.0000);
+('R1', 'SKS', 'CB', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R10', 'CK', 'B', 'CK', 0.000, 0.000, 0.000, 0.000),
+('R11', 'CK', 'SB', 'CK', 0.000, 0.000, 0.000, 0.000),
+('R12', 'CK', 'SBS', 'CK', 0.000, 0.000, 0.000, 0.000),
+('R13', 'K', 'CB', 'K', 0.000, 0.000, 0.000, 0.000),
+('R14', 'K', 'B', 'K', 0.000, 0.000, 0.000, 0.000),
+('R15', 'K', 'SB', 'K', 0.000, 0.000, 0.000, 0.000),
+('R16', 'K', 'SBS', 'K', 0.000, 0.000, 0.000, 0.000),
+('R17', 'SKS', 'SDS', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R18', 'SKS', 'SD', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R19', 'SKS', 'CD', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R2', 'SKS', 'B', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R20', 'SKS', 'D', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R21', 'SK', 'SDS', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R22', 'SK', 'SD', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R23', 'SK', 'CD', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R24', 'SK', 'D', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R25', 'CK', 'SDS', 'CK', 0.000, 0.000, 0.000, 0.000),
+('R26', 'CK', 'SD', 'CK', 0.000, 0.000, 0.000, 0.000),
+('R27', 'CK', 'CD', 'CK', 0.365, 3353.780, 4080.220, 7434.000),
+('R28', 'CK', 'D', 'CK', 0.570, 3471.040, 3962.960, 7434.000),
+('R29', 'K', 'SDS', 'K', 0.000, 0.000, 0.000, 0.000),
+('R3', 'SKS', 'SB', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R30', 'K', 'SD', 'K', 0.000, 0.000, 0.000, 0.000),
+('R31', 'K', 'CD', 'K', 0.365, 3925.780, 4652.220, 8578.000),
+('R32', 'K', 'D', 'K', 0.430, 3962.960, 4615.040, 8578.000),
+('R33', 'CM', 'CB', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R34', 'CM', 'B', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R35', 'CM', 'SB', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R36', 'CM', 'SBS', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R37', 'M', 'CB', 'M', 0.000, 0.000, 0.000, 0.000),
+('R38', 'M', 'B', 'M', 0.000, 0.000, 0.000, 0.000),
+('R39', 'M', 'SB', 'M', 0.000, 0.000, 0.000, 0.000),
+('R4', 'SKS', 'SBS', 'SKS', 0.000, 0.000, 0.000, 0.000),
+('R40', 'M', 'SBS', 'M', 0.000, 0.000, 0.000, 0.000),
+('R41', 'SM', 'CB', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R42', 'SM', 'B', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R43', 'SM', 'SB', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R44', 'SM', 'SBS', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R45', 'SMS', 'CB', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R46', 'SMS', 'B', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R47', 'SMS', 'SB', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R48', 'SMS', 'SBS', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R49', 'CM', 'SDS', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R5', 'SK', 'CB', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R50', 'CM', 'SD', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R51', 'CM', 'CD', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R52', 'CM', 'D', 'CM', 0.000, 0.000, 0.000, 0.000),
+('R53', 'M', 'SDS', 'M', 0.000, 0.000, 0.000, 0.000),
+('R54', 'M', 'SD', 'M', 0.000, 0.000, 0.000, 0.000),
+('R55', 'M', 'CD', 'M', 0.000, 0.000, 0.000, 0.000),
+('R56', 'M', 'D', 'M', 0.000, 0.000, 0.000, 0.000),
+('R57', 'SM', 'SDS', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R58', 'SM', 'SD', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R59', 'SM', 'CD', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R6', 'SK', 'B', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R60', 'SM', 'D', 'SM', 0.000, 0.000, 0.000, 0.000),
+('R61', 'SMS', 'SDS', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R62', 'SMS', 'SD', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R63', 'SMS', 'CD', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R64', 'SMS', 'D', 'SMS', 0.000, 0.000, 0.000, 0.000),
+('R7', 'SK', 'SB', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R8', 'SK', 'SBS', 'SK', 0.000, 0.000, 0.000, 0.000),
+('R9', 'CK', 'CB', 'CK', 0.000, 0.000, 0.000, 0.000);
 
 -- --------------------------------------------------------
 
@@ -269,10 +290,10 @@ CREATE TABLE `rule_tsukamoto` (
   `permintaan` varchar(50) NOT NULL,
   `stok` varchar(50) NOT NULL,
   `produksi` varchar(50) NOT NULL,
-  `alpha_predikat` decimal(10,4) DEFAULT NULL,
-  `z1` decimal(10,4) DEFAULT NULL,
-  `z2` decimal(10,4) DEFAULT NULL,
-  `z` decimal(10,4) NOT NULL
+  `alpha_predikat` decimal(10,3) DEFAULT NULL,
+  `z1` decimal(10,3) DEFAULT NULL,
+  `z2` decimal(10,3) DEFAULT NULL,
+  `z` decimal(10,3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -280,10 +301,10 @@ CREATE TABLE `rule_tsukamoto` (
 --
 
 INSERT INTO `rule_tsukamoto` (`id`, `permintaan`, `stok`, `produksi`, `alpha_predikat`, `z1`, `z2`, `z`) VALUES
-('R1', 'Berkurang', 'Banyak', 'Berkurang', NULL, NULL, NULL, 0.0000),
-('R2', 'Berkurang', 'Sedikit', 'Berkurang', NULL, NULL, NULL, 0.0000),
-('R3', 'Meningkat', 'Banyak', 'Meningkat', NULL, NULL, NULL, 0.0000),
-('R4', 'Meningkat', 'Sedikit', 'Meningkat', NULL, NULL, NULL, 0.0000);
+('R1', 'Berkurang', 'Banyak', 'Berkurang', 0.404, 0.000, 0.000, 5069.400),
+('R2', 'Berkurang', 'Sedikit', 'Berkurang', 0.596, 0.000, 0.000, 4080.600),
+('R3', 'Meningkat', 'Banyak', 'Meningkat', 0.381, 0.000, 0.000, 3962.150),
+('R4', 'Meningkat', 'Sedikit', 'Meningkat', 0.381, 0.000, 0.000, 3962.150);
 
 -- --------------------------------------------------------
 
@@ -331,6 +352,12 @@ ALTER TABLE `fungsi_keanggotaan_tsukamoto`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indeks untuk tabel `pengaturan_variabel`
+--
+ALTER TABLE `pengaturan_variabel`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeks untuk tabel `rule_gridk2`
 --
 ALTER TABLE `rule_gridk2`
@@ -374,6 +401,12 @@ ALTER TABLE `fungsi_keanggotaan_gridk3`
 -- AUTO_INCREMENT untuk tabel `fungsi_keanggotaan_tsukamoto`
 --
 ALTER TABLE `fungsi_keanggotaan_tsukamoto`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT untuk tabel `pengaturan_variabel`
+--
+ALTER TABLE `pengaturan_variabel`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
