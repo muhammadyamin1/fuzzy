@@ -12,7 +12,7 @@ $isSuperAdmin = ($currentUser == 1); // Cek apakah yang mengakses adalah admin u
 // Jika admin utama (id 1) sedang diedit oleh orang lain, blok aksesnya
 if ($id == 1 && !$isSelf && !$isSuperAdmin) {
     $_SESSION['error'] = "Anda tidak diizinkan mengubah data admin utama.";
-    header('Location: user.php');
+    header('Location: users.php');
     exit();
 }
 
