@@ -41,6 +41,9 @@ $Exists = mysqli_num_rows($result) > 0;
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
     <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 </head>
 
 <body class="theme-red">
@@ -137,6 +140,7 @@ $Exists = mysqli_num_rows($result) > 0;
                                             <th>No.</th>
                                             <th>Jenis</th>
                                             <th>Nama Fungsi</th>
+                                            <th class="text-center">Variabel</th>
                                             <th>Tipe</th>
                                             <th>Batas Bawah</th>
                                             <th>Batas Tengah</th>
@@ -153,6 +157,17 @@ $Exists = mysqli_num_rows($result) > 0;
                                                 <td><?php echo $nomor++ . '.'; ?></td>
                                                 <td><?php echo $row['jenis']; ?></td>
                                                 <td><?php echo $row['nama_fungsi']; ?></td>
+                                                <td class="text-center">
+                                                    <?php
+                                                    // Menggabungkan huruf, subscript, dan superscript
+                                                    $huruf = $row['huruf'] ?? '';
+                                                    $subscript = $row['subscript'] ?? '';
+                                                    $superscript = $row['superscript'] ?? '';
+
+                                                    // Menampilkan format MathJax LaTeX
+                                                    echo "<span>\(" . $huruf . "_{" . $subscript . "}^{" . $superscript . "}\)</span>";
+                                                    ?>
+                                                </td>
                                                 <td><?php echo $row['tipe']; ?></td>
                                                 <td><?php echo $row['batas_bawah']; ?></td>
                                                 <td><?php echo $row['batas_tengah']; ?></td>

@@ -34,6 +34,9 @@ checkRole(['admin']);
 
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
     <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
 </head>
 
 <body class="theme-red">
@@ -125,6 +128,33 @@ checkRole(['admin']);
                                         <input type="text" id="namaFungsiMenurun" name="namaFungsiMenurun" class="form-control" required>
                                     </div>
                                 </div>
+                                
+                                <label for="variabelFungsiMenurun" class="control-label">Ketik Variabel Fungsi (Kurva Menurun):</label>
+                                <div class="row">
+                                    <!-- Input untuk Huruf -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="text" id="fungsiHurufMenurun" name="fungsiHurufMenurun" class="form-control" placeholder="Huruf" maxlength="1" required>
+                                        </div>
+                                    </div>
+                                    <!-- Input untuk Subscript (angka bawah) -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="number" id="fungsiSubscriptMenurun" name="fungsiSubscriptMenurun" class="form-control" placeholder="Subscript" required>
+                                        </div>
+                                    </div>
+                                    <!-- Input untuk Superscript (angka atas) -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="number" id="fungsiSuperscriptMenurun" name="fungsiSuperscriptMenurun" class="form-control" placeholder="Superscript">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <p id="previewFungsiMenurun" class="text-center">Variabel Fungsi akan tampil di sini</p>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <label for="kurvaMenurunBawah" class="control-label">Batas Bawah (Kurva Menurun):</label>
                                 <div class="form-group">
@@ -152,6 +182,33 @@ checkRole(['admin']);
                                 <div class="form-group">
                                     <div class="form-line">
                                         <input type="text" id="namaFungsiMenaik" name="namaFungsiMenaik" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <label for="variabelFungsiMenaik" class="control-label">Ketik Variabel Fungsi (Kurva Menaik):</label>
+                                <div class="row">
+                                    <!-- Input untuk Huruf -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="text" id="fungsiHurufMenaik" name="fungsiHurufMenaik" class="form-control" placeholder="Huruf" maxlength="1" required>
+                                        </div>
+                                    </div>
+                                    <!-- Input untuk Subscript (angka bawah) -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="number" id="fungsiSubscriptMenaik" name="fungsiSubscriptMenaik" class="form-control" placeholder="Subscript" required>
+                                        </div>
+                                    </div>
+                                    <!-- Input untuk Superscript (angka atas) -->
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <input type="number" id="fungsiSuperscriptMenaik" name="fungsiSuperscriptMenaik" class="form-control" placeholder="Superscript">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <div class="form-line">
+                                            <p id="previewFungsiMenaik" class="text-center">Variabel Fungsi akan tampil di sini</p>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -236,6 +293,31 @@ checkRole(['admin']);
 
             let segitigaCount = 0;
 
+            function updateNamaFungsiSegitiga(id) {
+                const huruf = document.getElementById(`fungsiHurufSegitiga${id}`).value;
+                const subscript = document.getElementById(`fungsiSubscriptSegitiga${id}`).value;
+                const superscript = document.getElementById(`fungsiSuperscriptSegitiga${id}`).value;
+
+                // Gabungkan menjadi format LaTeX
+                const latexString = `${huruf}_{${subscript}}^{${superscript}}`;
+
+                // Update MathJax preview
+                document.getElementById(`previewFungsiSegitiga${id}`).innerHTML = `\\(${latexString}\\)`;
+                MathJax.typeset(); // Render ulang MathJax agar LaTeX ditampilkan
+            }
+
+            function addSegitigaEventListeners(id) {
+                document.getElementById(`fungsiHurufSegitiga${id}`).addEventListener('input', function() {
+                    updateNamaFungsiSegitiga(id);
+                });
+                document.getElementById(`fungsiSubscriptSegitiga${id}`).addEventListener('input', function() {
+                    updateNamaFungsiSegitiga(id);
+                });
+                document.getElementById(`fungsiSuperscriptSegitiga${id}`).addEventListener('input', function() {
+                    updateNamaFungsiSegitiga(id);
+                });
+            }
+
             $('#addSegitiga').click(function() {
                 segitigaCount++;
                 $('#segitigaContainer').append(`
@@ -245,6 +327,30 @@ checkRole(['admin']);
                         <div class="form-group">
                             <div class="form-line">
                                 <input type="text" id="namaFungsiSegitiga${segitigaCount}" name="namaFungsiSegitiga[]" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <label for="variabelFungsiSegitiga${segitigaCount}" class="control-label">Ketik Variabel Fungsi (Segitiga ${segitigaCount}):</label>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="form-line">
+                                    <input type="text" id="fungsiHurufSegitiga${segitigaCount}" name="fungsiHurufSegitiga[]" class="form-control" placeholder="Huruf" maxlength="1" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-line">
+                                    <input type="number" id="fungsiSubscriptSegitiga${segitigaCount}" name="fungsiSubscriptSegitiga[]" class="form-control" placeholder="Subscript" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-line">
+                                    <input type="number" id="fungsiSuperscriptSegitiga${segitigaCount}" name="fungsiSuperscriptSegitiga[]" class="form-control" placeholder="Superscript">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-line">
+                                    <p id="previewFungsiSegitiga${segitigaCount}" class="text-center">Variabel Fungsi akan tampil di sini</p>
+                                </div>
                             </div>
                         </div>
 
@@ -279,6 +385,9 @@ checkRole(['admin']);
                 $(`#segitiga${segitigaCount} input[type="number"]`).on('wheel', function(e) {
                     e.preventDefault();
                 });
+
+                // Panggil fungsi untuk menambahkan event listener
+                addSegitigaEventListeners(segitigaCount);
             });
 
             $(document).on('click', '.remove-segitiga', function() {
@@ -296,6 +405,42 @@ checkRole(['admin']);
                 });
             }
         });
+
+        function updateNamaFungsiMenurun() {
+            const huruf = document.getElementById('fungsiHurufMenurun').value;
+            const subscript = document.getElementById('fungsiSubscriptMenurun').value;
+            const superscript = document.getElementById('fungsiSuperscriptMenurun').value;
+
+            // Gabungkan menjadi format LaTeX untuk MathJax (contoh: D_{1}^{6})
+            const latexString = `${huruf}_{${subscript}}^{${superscript}}`;
+
+            // Update MathJax preview
+            document.getElementById('previewFungsiMenurun').innerHTML = `\\(${latexString}\\)`;
+            MathJax.typeset(); // Render ulang MathJax agar LaTeX ditampilkan
+        }
+
+        // Event listener untuk setiap input perubahan
+        document.getElementById('fungsiHurufMenurun').addEventListener('input', updateNamaFungsiMenurun);
+        document.getElementById('fungsiSubscriptMenurun').addEventListener('input', updateNamaFungsiMenurun);
+        document.getElementById('fungsiSuperscriptMenurun').addEventListener('input', updateNamaFungsiMenurun);
+
+        function updateNamaFungsiMenaik() {
+            const huruf = document.getElementById('fungsiHurufMenaik').value;
+            const subscript = document.getElementById('fungsiSubscriptMenaik').value;
+            const superscript = document.getElementById('fungsiSuperscriptMenaik').value;
+
+            // Gabungkan menjadi format LaTeX untuk MathJax (contoh: D_{1}^{6})
+            const latexString = `${huruf}_{${subscript}}^{${superscript}}`;
+
+            // Update MathJax preview
+            document.getElementById('previewFungsiMenaik').innerHTML = `\\(${latexString}\\)`;
+            MathJax.typeset(); // Render ulang MathJax agar LaTeX ditampilkan
+        }
+
+        // Event listener untuk setiap input perubahan
+        document.getElementById('fungsiHurufMenaik').addEventListener('input', updateNamaFungsiMenaik);
+        document.getElementById('fungsiSubscriptMenaik').addEventListener('input', updateNamaFungsiMenaik);
+        document.getElementById('fungsiSuperscriptMenaik').addEventListener('input', updateNamaFungsiMenaik);
     </script>
 </body>
 

@@ -36,6 +36,8 @@ include 'dbKoneksi.php';
     <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
     <link href="css/themes/all-themes.css" rel="stylesheet" />
 
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
     <style>
         .id-rule-width {
             width: 20%;
@@ -182,8 +184,14 @@ include 'dbKoneksi.php';
                                                     </div>
                                                 </div>
 
-                                                <!-- Select untuk Permintaan -->
-                                                <label for="permintaan" class="control-label">Permintaan:</label>
+                                                <!-- Menampilkan informasi tentang rule fuzzy menggunakan MathJax -->
+                                                <p>Aturan fuzzy yang dimasukkan menggunakan format:</p>
+                                                <p>\[
+                                                    \text{If} \ D \ \text{and} \ S \ \text{then} \ P
+                                                    \]</p>
+
+                                                <!-- Select untuk Permintaan dengan notasi matematika -->
+                                                <label for="permintaan" class="control-label">Permintaan \( D \):</label>
                                                 <select name="permintaan" id="permintaan" class="form-control show-tick">
                                                     <?php
                                                     // Query untuk mengambil data Permintaan
@@ -197,8 +205,8 @@ include 'dbKoneksi.php';
                                                     ?>
                                                 </select>
 
-                                                <!-- Select untuk Stok -->
-                                                <label for="stok" class="control-label" style="margin-top: 15px;">Stok:</label>
+                                                <!-- Select untuk Stok dengan notasi matematika -->
+                                                <label for="stok" class="control-label" style="margin-top: 15px;">Stok \( S \):</label>
                                                 <select name="stok" id="stok" class="form-control">
                                                     <?php
                                                     // Query untuk mengambil data Stok
@@ -212,8 +220,8 @@ include 'dbKoneksi.php';
                                                     ?>
                                                 </select>
 
-                                                <!-- Select untuk Produksi -->
-                                                <label for="produksi" class="control-label" style="margin-top: 15px;">Produksi:</label>
+                                                <!-- Select untuk Produksi dengan notasi matematika -->
+                                                <label for="produksi" class="control-label" style="margin-top: 15px;">Produksi \( P \):</label>
                                                 <select name="produksi" id="produksi" class="form-control">
                                                     <?php
                                                     // Query untuk mengambil data Produksi
@@ -321,6 +329,10 @@ include 'dbKoneksi.php';
         setTimeout(function() {
             $(".alert").alert('close');
         }, 20000);
+
+        $('#ruleModal').on('shown.bs.modal', function() {
+            MathJax.typeset(); // Render MathJax setelah modal dibuka
+        });
     </script>
 
 </body>

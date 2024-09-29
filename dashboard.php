@@ -1,29 +1,5 @@
 ﻿<?php
 include 'auth.php';
-include 'dbKoneksi.php';
-
-// Mengambil nilai dari pengaturan_variabel
-$sql = "SELECT * FROM pengaturan_variabel WHERE nama_variabel IN ('stok_maksimum', 'permintaan', 'stok')";
-$result = mysqli_query($conn, $sql);
-
-// Inisialisasi nilai default
-$stok_maksimum = 0;
-$permintaan = 0;
-$stok = 0;
-
-if ($result && mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        if ($row['nama_variabel'] == 'stok_maksimum') {
-            $stok_maksimum = $row['nilai_variabel'];
-        } elseif ($row['nama_variabel'] == 'permintaan') {
-            $permintaan = $row['nilai_variabel'];
-        } elseif ($row['nama_variabel'] == 'stok') {
-            $stok = $row['nilai_variabel'];
-        }
-    }
-}
-
-mysqli_close($conn);
 ?>
 <!DOCTYPE html>
 <html>
@@ -141,8 +117,7 @@ mysqli_close($conn);
                             <i class="material-icons">equalizer</i>
                         </div>
                         <div class="content">
-                            <div class="text">PERMINTAAN</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $permintaan; ?>" data-speed="1000" data-fresh-interval="20"></div>
+                            <h3>Permintaan</h3>
                         </div>
                     </div>
                 </div>
@@ -152,8 +127,7 @@ mysqli_close($conn);
                             <i class="material-icons">storage</i>
                         </div>
                         <div class="content">
-                            <div class="text">STOK</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $stok; ?>" data-speed="1000" data-fresh-interval="20"></div>
+                            <h3>Stok</h3>
                         </div>
                     </div>
                 </div>
@@ -163,8 +137,7 @@ mysqli_close($conn);
                             <i class="material-icons">trending_up</i>
                         </div>
                         <div class="content">
-                            <div class="text">STOK MAKSIMUM</div>
-                            <div class="number count-to" data-from="0" data-to="<?php echo $stok_maksimum; ?>" data-speed="1000" data-fresh-interval="20">1225</div>
+                            <h3>Produksi</h3>
                         </div>
                     </div>
                 </div>
