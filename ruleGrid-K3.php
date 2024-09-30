@@ -250,25 +250,38 @@ include 'dbKoneksi.php';
                                 <table class="table table-striped">
                                     <thead>
                                         <tr>
-                                            <th class="id-rule-width">ID Rule</th>
-                                            <th class="equal-width">Permintaan</th>
-                                            <th class="equal-width">Stok</th>
-                                            <th class="equal-width">Produksi</th>
+                                            <th class="id-rule-width text-center">ID Rule</th>
+                                            <th class="equal-width text-center">Permintaan</th>
+                                            <th class="equal-width text-center">Stok</th>
+                                            <th class="equal-width text-center">Produksi</th>
                                             <th class="action-center">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php
                                         // Query untuk menampilkan data Rule yang ada
-                                        $queryRule = "SELECT id, permintaan, stok, produksi FROM rule_gridk3 ORDER BY CAST(SUBSTRING(id, 2) AS UNSIGNED)";
+                                        $queryRule = "
+                                        SELECT r.id, 
+                                            CONCAT(f1.huruf, '_', f1.subscript, 
+                                                    CASE WHEN f1.superscript IS NOT NULL THEN CONCAT('^', f1.superscript) ELSE '' END) AS permintaan_latex, 
+                                            CONCAT(f2.huruf, '_', f2.subscript, 
+                                                    CASE WHEN f2.superscript IS NOT NULL THEN CONCAT('^', f2.superscript) ELSE '' END) AS stok_latex, 
+                                            CONCAT(f3.huruf, '_', f3.subscript, 
+                                                    CASE WHEN f3.superscript IS NOT NULL THEN CONCAT('^', f3.superscript) ELSE '' END) AS produksi_latex 
+                                        FROM rule_gridk3 r 
+                                        INNER JOIN fungsi_keanggotaan_gridk3 f1 ON r.permintaan = f1.nama_fungsi AND f1.jenis = 'Permintaan' 
+                                        INNER JOIN fungsi_keanggotaan_gridk3 f2 ON r.stok = f2.nama_fungsi AND f2.jenis = 'Stok' 
+                                        INNER JOIN fungsi_keanggotaan_gridk3 f3 ON r.produksi = f3.nama_fungsi AND f3.jenis = 'Produksi' 
+                                        ORDER BY CAST(SUBSTRING(r.id, 2) AS UNSIGNED);
+                                        ";
                                         $resultRule = $conn->query($queryRule);
                                         if ($resultRule->num_rows > 0) {
                                             while ($row = $resultRule->fetch_assoc()) {
                                                 echo "<tr>
-                                                    <td>{$row['id']}</td>
-                                                    <td>{$row['permintaan']}</td>
-                                                    <td>{$row['stok']}</td>
-                                                    <td>{$row['produksi']}</td>
+                                                    <td class='text-center'>{$row['id']}</td>
+                                                    <td class='text-center'><span>\({$row['permintaan_latex']}\)</span></td>
+                                                    <td class='text-center'><span>\({$row['stok_latex']}\)</span></td>
+                                                    <td class='text-center'><span>\({$row['produksi_latex']}\)</span></td>
                                                     <td class='action-center'>
                                                         <a href='hapusRuleGridK3.php?id={$row['id']}' class='btn btn-danger' onclick=\"return confirm('Yakin ingin menghapus data ini?')\">Hapus</a>
                                                     </td>
