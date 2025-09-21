@@ -1,75 +1,56 @@
-AdminBSB - Material Design
-=======================
-[![npm version](https://img.shields.io/npm/v/adminbsb-materialdesign.svg)](https://www.npmjs.com/package/adminbsb-materialdesign)
-![Bower version](https://img.shields.io/bower/v/adminbsb-materialdesign.svg)
+# Sistem Optimalisasi Produksi dengan Fuzzy Logic
 
-**AdminBSB - Material Design is a fully responsive and free admin template.** It was developed with [Bootstrap 3.x Framework](http://getbootstrap.com) and [Google Material Design](https://material.google.com) of powers.
+**Sistem ini** dirancang untuk mendukung transformasi ke **Ekonomi Digital** melalui pendekatan **Fuzzy Logic**.  
+Aplikasi membandingkan tiga metode Fuzzy untuk menentukan strategi produksi paling optimal berdasarkan **permintaan** dan **stok**:
 
-It's really easy to customize and usage. You can use for from 320px to large resolution pixels of new generation screens and mobile devices. (**Fully Responsive Material Design**)
+- **Fuzzy Tsukamoto**  
+- **Fuzzy Grid Partition (K=2)**  
+- **Fuzzy Grid Partition (K=3)**  
 
-Looking for Premium Templates?
-----------------
-**If you need more features please visit portfolio of mine which page link is [https://themeforest.net/user/gurayyarar/portfolio](http://bit.ly/2oPFpmQ)**
+---
 
-Demo
-----------------
-You can check the website preview with **[this link](https://gurayyarar.github.io/AdminBSBMaterialDesign/)**  
+## Tujuan
+Sistem membantu menentukan **jumlah produksi optimal** dengan mempertimbangkan stok yang tersedia dan permintaan pasar, sehingga produksi lebih efisien dan sesuai dengan kebutuhan.
 
-![AdminBSB - Free Admin Template With Material Design](https://raw.githubusercontent.com/gurayyarar/AdminBSBMaterialDesign/master/images/screenshot.png)
+---
 
-Installation
-----------------
-You can choose one from multiple ways for installation.
+## Instalasi
+1. Unduh source code proyek ini.  
+2. Ekstrak ke folder `htdocs` pada instalasi **XAMPP** (atau `www` jika menggunakan LAMP).  
+3. Buat basis data baru dengan nama `fuzzy`.  
+4. Impor file SQL yang tersedia di folder `database/`.  
+5. Jalankan server Apache dan MySQL dari XAMPP.  
+6. Akses aplikasi melalui browser: `http://localhost/fuzzy/`  
 
-**GitHub**
-- Fork the repository ([here is the guide](https://help.github.com/articles/fork-a-repo/)).
-- Clone to your machine
-```
-git clone https://github.com/gurayyarar/AdminBSBMaterialDesign.git
-```
+---
 
-**npm**
-```
-npm install adminbsb-materialdesign
-```
+## Akun Login
+- **Super Admin**  
+  - Username: `murni`  
+  - Password: `admin`  
+  - Hak Akses: Mengelola semua menu dan pengguna dalam sistem  
 
-**bower**
-```
-bower install adminbsb-materialdesign
-```
+*(disarankan segera mengganti password setelah login pertama)*  
 
-Documentation
-----------
-Visit the **[documentation](https://gurayyarar.github.io/AdminBSBMaterialDesign/documentation/)**
+---
 
-Browser Support
-----------
-- IE 10 +
-- Microsoft Edge (Latest)
-- Mozilla Firefox (Latest)
-- Google Chrome (Latest)
-- Opera (Latest)
-- Safari (Latest)
+## Kredit
+- **Ide & Penelitian Akademik**: © 2024 – STMIK Pelita Nusantara  
+  [Dr. Murni Marbun, S.Si., M.M., M.Kom.](https://scholar.google.co.id/citations?user=zFJHYacAAAAJ&hl=id)  
+- **Pengembang Aplikasi (Implementasi)**: M. Yamin, S.Kom  
 
-Change Logs
-----------
-You can display all release notes with **[this link](https://gurayyarar.github.io/AdminBSBMaterialDesign/pages/changelogs.html)**
+---
 
+## Teknologi
+- **Bahasa Pemrograman**: PHP 8.3  
+- **Basis Data**: MySQL  
+- **Framework CSS**: Bootstrap  
+- **JavaScript**: DataTables, jQuery  
 
-FAQ
-===
-**Can I use this template for personal or commercial websites/web projects?**  
-Sure, you can use both of personal and commercial websites/web projects.
+---
 
-**Is the attribution link required?**  
-No, not required. (Though very much appreciated)
+## Lisensi
+Proyek ini dilisensikan di bawah **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)**.  
+Artinya, Anda bebas menggunakan, memodifikasi, dan membagikan proyek ini **selama mencantumkan atribusi** dan **tidak digunakan untuk tujuan komersial**.  
 
-License
-----------
-**AdminBSB - Material Design** is an open source project that is licensed under the [MIT license](http://opensource.org/licenses/MIT).
-
-Donations
-----------
-Donations are **greatly appreciated!**
-
-**[BUY ME A COFFEE](http://bit.ly/2yEjtx5)**
+---
